@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Unlock the Cube: Competition</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+
+    body{
+      margin:0;
+      background:#f3f4f6;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    .sidebar{
+      width:270px;
+      background:white;
+      border-right:1px solid #ddd;
+      height:100vh;
+      position:fixed;
+      overflow:auto;
+    }
+
+    .main{
+      margin-left:270px;
+    }
+
+    .header{
+      background:#1976d2;
+      color:white;
+      padding:14px 30px;
+      font-size:24px;
+      font-weight:bold;
+    }
+
+    .eventBtn{
+      width:100%;
+      padding:20px 24px;
+      border:none;
+      background:white;
+      text-align:left;
+      font-size:17px;
+      border-bottom:1px solid #eee;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .eventBtn:hover{
+      background:#f5f5f5;
+    }
+
+    .activeEvent{
+      background:#e8f0fe;
+      color:#1565c0;
+      font-weight:bold;
+    }
+
+    .section{
+      padding:35px;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .title{
+      font-size:34px;
+      font-weight:bold;
+      margin-bottom:25px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius:14px;
+      overflow:hidden;
+    }
+
+    th{
+      background:#fafafa;
+      padding:16px;
+      border-bottom:2px solid #ddd;
+      text-align:center;
+      font-size:18px;
+    }
+
+    td{
+      padding:12px;
+      border-bottom:1px solid #eee;
+      text-align:center;
+    }
+
+    input{
+      width:90px;
+      padding:8px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      text-align:center;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:#1976d2;
+      box-shadow:0 0 0 3px rgba(25,118,210,0.15);
+    }
+
+    .nameInput{
+      width:330px;
+      text-align:left;
+    }
+
+    .teamInput{
+      width:220px;
+      text-align:left;
+    }
+
+    .rankBox{
+      width:52px;
+      margin:auto;
+      padding:10px;
+      border-radius:8px;
+      background:#ececec;
+      font-weight:bold;
+    }
+
+    .green{
+      background:#00e676;
+    }
+
+    .gold{
+      background:#ffd600;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+
+  <div class="sidebar">
+
+    <div class="p-6 text-3xl font-bold border-b">
+      🧩 Events
+    </div>
+
+    <button class="eventBtn activeEvent" id="btn333" onclick="showEvent('333')">
+      🟦 3x3x3 Cube
+    </button>
+
+    <button class="eventBtn" id="btn222" onclick="showEvent('222')">
+      🟨 2x2x2 Cube
+    </button>
+
+    <button class="eventBtn" id="btnteamblind" onclick="showEvent('teamblind')">
+      👁️ 3x3 Team Blind
+    </button>
+
+    <button class="eventBtn" id="btnteamsolve" onclick="showEvent('teamsolve')">
+      🤝 3x3 Team Solve
+    </button>
+
+    <button class="eventBtn" id="btn333finals" onclick="generate333Finals()">
+      🏆 3x3 Finals
+    </button>
+
+    <button class="eventBtn" id="btn222finals" onclick="generate222Finals()">
+      🏆 2x2 Finals
+    </button>
+
+    <button class="eventBtn" id="btnteamblindfinals" onclick="generateBlindFinals()">
+      🏆 Team Blind Finals
+    </button>
+
+    <button class="eventBtn" id="btnteamsolvefinals" onclick="generateSolveFinals()">
+      🏆 Team Solve Finals
+    </button>
+
+  </div>
+
+  <!-- MAIN -->
+
+  <div class="main">
+
+    <div class="header">
+      Unlock the Cube: Competition
+    </div>
+
+    <div id="content"></div>
+
+  </div>
+
+  <script>
+
+    /* NAMES */
+
+    let names = [
+
+      "ALBERT ANGGAKUSUMA",
+      "CHONG YI XUAN",
+      "DARRYL LEE CHENG ZHE",
+      "ETHAN LEE YIH HERNG",
+      "GUO RUIXUAN",
+      "HAN YICHEN",
+      "KANG PIN YUAN CALLUM",
+      "KHONG JING KAI, BRANDON",
+      "KOH WENRYN",
+      "KOO JIA KAI",
+      "KYAN WANG JIAKAI",
+      "LI MINGCAN ADRIAL",
+      "LIM JUN YI",
+      "LIN JING'AN JEREMY",
+      "LOH ZHENG YU",
+      "LOW ZE JUN JERRY",
+      "LU SHENGBO ETHAN",
+      "NG YU YANG, LUCAS",
+      "SHENG ZHOUYI",
+      "SUN JIAHAO",
+      "WANG HAO YANG",
+      "XANTHUS CHO XUAN ZHE",
+      "YANG XIUXUAN",
+      "YIO CHEUK YUEN JAYDEN",
+      "ZHENG YONGCHENG"
+
+    ];
+
+    /* EVENTS */
+
+    let events = {
+
+      "333": [],
+      "222": [],
+      "teamblind": [],
+      "teamsolve": [],
+
+      "333finals": [],
+      "222finals": [],
+      "teamblindfinals": [],
+      "teamsolvefinals": []
+
+    };
+
+    /* CREATE INDIVIDUAL EVENTS */
+
+    names.forEach(name=>{
+
+      events["333"].push({
+
+        name:name,
+        times:["","","","",""],
+        avg:null,
+        best:null
+
+      });
+
+      events["222"].push({
+
+        name:name,
+        times:["","","","",""],
+        avg:null,
+        best:null
+
+      });
+
+    });
+
+    /* CREATE TEAM EVENTS */
+
+    for(let i=0;i<8;i++){
+
+      events["teamblind"].push({
+
+        member1:"",
+        member2:"",
+        times:["","",""],
+        avg:null,
+        best:null
+
+      });
+
+      events["teamsolve"].push({
+
+        member1:"",
+        member2:"",
+        times:["","",""],
+        avg:null,
+        best:null
+
+      });
+
+    }
+
+    /* SHOW EVENT */
+
+    function showEvent(event){
+
+      Object.keys(events).forEach(e=>{
+
+        let section =
+          document.getElementById("section"+e);
+
+        let button =
+          document.getElementById("btn"+e);
+
+        if(section)
+          section.classList.add("hidden");
+
+        if(button)
+          button.classList.remove("activeEvent");
+
+      });
+
+      document
+        .getElementById("section"+event)
+        .classList.remove("hidden");
+
+      document
+        .getElementById("btn"+event)
+        .classList.add("activeEvent");
+
+    }
+
+    /* CALCULATE */
+
+    function calculate(event,index){
+
+      let c = events[event][index];
+
+      let raw = c.times;
+
+      if(raw.some(t=>t==="")){
+
+        c.avg=null;
+        c.best=null;
+        return;
+
+      }
+
+      let parsed = raw.map(t=>{
+
+        if(
+          String(t).toUpperCase()==="DNF"
+        )
+          return "DNF";
+
+        return Number(t);
+
+      });
+
+      let nums =
+        parsed.filter(x=>x!=="DNF");
+
+      c.best =
+        nums.length
+        ? Math.min(...nums)
+        : "DNF";
+
+      let dnf =
+        parsed.filter(x=>x==="DNF").length;
+
+      /* TEAM EVENTS */
+
+      if(event.includes("team")){
+
+        if(dnf>=1){
+
+          c.avg="DNF";
+          return;
+
+        }
+
+        c.avg =
+          parsed.reduce((a,b)=>a+b,0)
+          /parsed.length;
+
+        return;
+
+      }
+
+      /* NORMAL EVENTS */
+
+      if(dnf>=2){
+
+        c.avg="DNF";
+        return;
+
+      }
+
+      if(dnf===1){
+
+        let arr =
+          parsed.filter(x=>x!=="DNF");
+
+        let best =
+          Math.min(...arr);
+
+        arr.splice(
+          arr.indexOf(best),
+          1
+        );
+
+        c.avg =
+          arr.reduce((a,b)=>a+b,0)
+          /3;
+
+        return;
+
+      }
+
+      let sorted =
+        [...parsed].sort((a,b)=>a-b);
+
+      sorted.shift();
+      sorted.pop();
+
+      c.avg =
+        sorted.reduce((a,b)=>a+b,0)
+        /3;
+
+    }
+
+    /* UPDATE TIME */
+
+    function updateTime(
+      event,
+      index,
+      solve,
+      value
+    ){
+
+      events[event][index]
+        .times[solve]=value;
+
+      calculate(event,index);
+
+      render(event);
+
+    }
+
+    /* UPDATE NAME */
+
+    function updateName(
+      event,
+      index,
+      key,
+      value
+    ){
+
+      events[event][index][key]=value;
+
+    }
+
+    /* RENDER */
+
+    function render(event){
+
+      let tbody =
+        document.getElementById(
+          "table"+event
+        );
+
+      tbody.innerHTML="";
+
+      let ranked =
+        [...events[event]];
+
+      /* SORTING */
+
+      if(
+        event==="333" ||
+        event==="222" ||
+        event==="333finals" ||
+        event==="222finals"
+      ){
+
+        ranked.sort((a,b)=>{
+
+          if(a.avg===null) return 1;
+          if(b.avg===null) return -1;
+
+          if(a.avg==="DNF") return 1;
+          if(b.avg==="DNF") return -1;
+
+          return a.avg-b.avg;
+
+        });
+
+      }
+
+      else{
+
+        ranked.sort((a,b)=>{
+
+          if(a.best===null) return 1;
+          if(b.best===null) return -1;
+
+          if(a.best==="DNF") return 1;
+          if(b.best==="DNF") return -1;
+
+          return a.best-b.best;
+
+        });
+
+      }
+
+      ranked.forEach((c,index)=>{
+
+        let tr =
+          document.createElement("tr");
+
+        let green="";
+
+        /* QUALIFY */
+
+        if(event==="333" && index<8)
+          green="green";
+
+        if(event==="222" && index<6)
+          green="green";
+
+        if(event==="teamblind" && index<4)
+          green="green";
+
+        if(event==="teamsolve" && index<4)
+          green="green";
+
+        /* FINALS */
+
+        if(event==="333finals" && index<3)
+          green="gold";
+
+        if(event==="222finals" && index<3)
+          green="gold";
+
+        if(event==="teamblindfinals" && index<1)
+          green="gold";
+
+        if(event==="teamsolvefinals" && index<1)
+          green="gold";
+
+        let team =
+          event.includes("team");
+
+        let solves =
+          team ? 3 : 5;
+
+        let nameHTML="";
+
+        if(team){
+
+          nameHTML=`
+
+            <td>
+
+              <input
+                class="teamInput"
+                value="${c.member1}"
+
+                onchange="
+                  updateName(
+                    '${event}',
+                    ${events[event].indexOf(c)},
+                    'member1',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+            <td>
+
+              <input
+                class="teamInput"
+                value="${c.member2}"
+
+                onchange="
+                  updateName(
+                    '${event}',
+                    ${events[event].indexOf(c)},
+                    'member2',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+          `;
+
+        }
+
+        else{
+
+          nameHTML=`
+
+            <td>
+
+              <input
+                class="nameInput"
+                value="${c.name}"
+
+                onchange="
+                  updateName(
+                    '${event}',
+                    ${events[event].indexOf(c)},
+                    'name',
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+          `;
+
+        }
+
+        let solveHTML="";
+
+        for(let i=0;i<solves;i++){
+
+          solveHTML += `
+
+            <td>
+
+              <input
+                value="${c.times[i]}"
+
+                onchange="
+                  updateTime(
+                    '${event}',
+                    ${events[event].indexOf(c)},
+                    ${i},
+                    this.value
+                  )
+                "
+              >
+
+            </td>
+
+          `;
+
+        }
+
+        tr.innerHTML=`
+
+          <td>
+            <div class="rankBox ${green}">
+              ${index+1}
+            </div>
+          </td>
+
+          ${nameHTML}
+
+          ${solveHTML}
+
+          <td>
+
+            ${
+              c.avg===null
+              ? "-"
+              : c.avg==="DNF"
+                ? "DNF"
+                : c.avg.toFixed(2)
+            }
+
+          </td>
+
+          <td>
+
+            ${
+              c.best===null
+              ? "-"
+              : c.best==="DNF"
+                ? "DNF"
+                : c.best.toFixed(2)
+            }
+
+          </td>
+
+        `;
+
+        tbody.appendChild(tr);
+
+      });
+
+    }
+
+    /* GENERATE FINALS */
+
+    function generate333Finals(){
+
+      events["333finals"] =
+
+        [...events["333"]]
+
+        .filter(c=>
+          c.avg!==null &&
+          c.avg!=="DNF"
+        )
+
+        .sort((a,b)=>
+          a.avg-b.avg
+        )
+
+        .slice(0,8)
+
+        .map(c=>({
+
+          name:c.name,
+          times:["","","","",""],
+          avg:null,
+          best:null
+
+        }));
+
+      render("333finals");
+
+      showEvent("333finals");
+
+    }
+
+    function generate222Finals(){
+
+      events["222finals"] =
+
+        [...events["222"]]
+
+        .filter(c=>
+          c.avg!==null &&
+          c.avg!=="DNF"
+        )
+
+        .sort((a,b)=>
+          a.avg-b.avg
+        )
+
+        .slice(0,6)
+
+        .map(c=>({
+
+          name:c.name,
+          times:["","","","",""],
+          avg:null,
+          best:null
+
+        }));
+
+      render("222finals");
+
+      showEvent("222finals");
+
+    }
+
+    function generateBlindFinals(){
+
+      events["teamblindfinals"] =
+
+        [...events["teamblind"]]
+
+        .filter(c=>
+          c.best!==null &&
+          c.best!=="DNF"
+        )
+
+        .sort((a,b)=>
+          a.best-b.best
+        )
+
+        .slice(0,4)
+
+        .map(c=>({
+
+          member1:c.member1,
+          member2:c.member2,
+          times:["","",""],
+          avg:null,
+          best:null
+
+        }));
+
+      render("teamblindfinals");
+
+      showEvent("teamblindfinals");
+
+    }
+
+    function generateSolveFinals(){
+
+      events["teamsolvefinals"] =
+
+        [...events["teamsolve"]]
+
+        .filter(c=>
+          c.best!==null &&
+          c.best!=="DNF"
+        )
+
+        .sort((a,b)=>
+          a.best-b.best
+        )
+
+        .slice(0,4)
+
+        .map(c=>({
+
+          member1:c.member1,
+          member2:c.member2,
+          times:["","",""],
+          avg:null,
+          best:null
+
+        }));
+
+      render("teamsolvefinals");
+
+      showEvent("teamsolvefinals");
+
+    }
+
+    /* CREATE SECTION */
+
+    function createSection(
+      event,
+      title,
+      solves,
+      team=false
+    ){
+
+      let solveHeaders="";
+
+      for(let i=1;i<=solves;i++){
+
+        solveHeaders += `<th>${i}</th>`;
+
+      }
+
+      let names = team
+
+        ? `
+          <th>Member 1</th>
+          <th>Member 2</th>
+        `
+
+        : `
+          <th>Name</th>
+        `;
+
+      return `
+
+        <div
+          class="section hidden"
+          id="section${event}"
+        >
+
+          <div class="title">
+            ${title}
+          </div>
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>#</th>
+
+                ${names}
+
+                ${solveHeaders}
+
+                <th>Average</th>
+                <th>Best</th>
+
+              </tr>
+
+            </thead>
+
+            <tbody id="table${event}"></tbody>
+
+          </table>
+
+        </div>
+
+      `;
+
+    }
+
+    /* CREATE ALL SECTIONS */
+
+    document.getElementById("content").innerHTML =
+
+      createSection(
+        "333",
+        "3x3x3 Cube - First Round",
+        5
+      )
+
+      +
+
+      createSection(
+        "222",
+        "2x2x2 Cube - First Round",
+        5
+      )
+
+      +
+
+      createSection(
+        "teamblind",
+        "3x3 Team Blind",
+        3,
+        true
+      )
+
+      +
+
+      createSection(
+        "teamsolve",
+        "3x3 Team Solve",
+        3,
+        true
+      )
+
+      +
+
+      createSection(
+        "333finals",
+        "3x3 Finals",
+        5
+      )
+
+      +
+
+      createSection(
+        "222finals",
+        "2x2 Finals",
+        5
+      )
+
+      +
+
+      createSection(
+        "teamblindfinals",
+        "3x3 Team Blind Finals",
+        3,
+        true
+      )
+
+      +
+
+      createSection(
+        "teamsolvefinals",
+        "3x3 Team Solve Finals",
+        3,
+        true
+      );
+
+    /* INITIAL RENDER */
+
+    showEvent("333");
+
+    render("333");
+    render("222");
+    render("teamblind");
+    render("teamsolve");
+    render("333finals");
+    render("222finals");
+    render("teamblindfinals");
+    render("teamsolvefinals");
+
+  </script>
+
+</body>
+</html>
