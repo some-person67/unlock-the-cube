@@ -35,7 +35,9 @@ body{
   min-height:100vh;
 }
 
-/* SIDEBAR */
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar{
   width:270px;
@@ -82,7 +84,9 @@ body{
   background:linear-gradient(135deg,#2563eb,#7c3aed);
 }
 
-/* MAIN */
+/* =========================
+   MAIN
+========================= */
 
 .main{
   flex:1;
@@ -137,7 +141,9 @@ body{
   flex:1;
 }
 
-/* CARD */
+/* =========================
+   CARD
+========================= */
 
 .card{
   background:rgba(255,255,255,0.05);
@@ -159,7 +165,9 @@ body{
   overflow-x:auto;
 }
 
-/* TABLE */
+/* =========================
+   TABLE
+========================= */
 
 table{
   width:100%;
@@ -184,21 +192,29 @@ tr:hover{
   background:rgba(255,255,255,.03);
 }
 
-/* RANKS */
+/* =========================
+   HIGHLIGHTS
+========================= */
+
+.qualified{
+  background:rgba(34,197,94,.16);
+}
 
 .rank1{
-  background:rgba(250,204,21,.16);
+  background:rgba(250,204,21,.22);
 }
 
 .rank2{
-  background:rgba(209,213,219,.12);
+  background:rgba(209,213,219,.16);
 }
 
 .rank3{
-  background:rgba(251,146,60,.12);
+  background:rgba(251,146,60,.16);
 }
 
-/* INPUTS */
+/* =========================
+   INPUTS
+========================= */
 
 .scoreInput{
   width:80px;
@@ -220,7 +236,9 @@ tr:hover{
   pointer-events:none;
 }
 
-/* BUTTONS */
+/* =========================
+   BUTTONS
+========================= */
 
 button{
   border:none;
@@ -236,7 +254,9 @@ button:hover{
   opacity:.92;
 }
 
-/* MOBILE */
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:950px){
 
@@ -344,6 +364,7 @@ Team Solve
 </div>
 
 <div class="loginBox">
+
 <input
 type="password"
 id="adminPass"
@@ -354,6 +375,7 @@ class="scoreInput"
 <button onclick="adminLogin()">
 Login
 </button>
+
 </div>
 
 </div>
@@ -368,9 +390,9 @@ Login
 
 <script>
 
-/* ======================
+/* =========================
    FIREBASE
-====================== */
+========================= */
 
 const firebaseConfig = {
   apiKey: "AIzaSyCKnH1kAR0z_3LtsHXNCBKQmF_VJLGl9ls",
@@ -382,18 +404,18 @@ firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
 
-/* ======================
+/* =========================
    STATE
-====================== */
+========================= */
 
 let isAdmin = false;
 let current = "333";
 
 let events = {};
 
-/* ======================
+/* =========================
    HELPERS
-====================== */
+========================= */
 
 function createCompetitor(name){
 
@@ -407,11 +429,11 @@ function createCompetitor(name){
 
 }
 
-function createTeam(){
+function createTeam(name){
 
   return {
     id: crypto.randomUUID(),
-    name: "Team",
+    name: name,
     times: ["","",""],
     avg: null,
     best: null
@@ -421,7 +443,9 @@ function createTeam(){
 
 function parseTime(v){
 
-  if(v === "" || v === null) return null;
+  if(v === "" || v === null){
+    return null;
+  }
 
   if(String(v).toUpperCase() === "DNF"){
     return "DNF";
@@ -441,9 +465,9 @@ function score(v){
 
 }
 
-/* ======================
+/* =========================
    INIT
-====================== */
+========================= */
 
 function init(){
 
@@ -467,15 +491,23 @@ function init(){
 
     "222": names.map(createCompetitor),
 
-    "teamblind": Array.from(
-      {length:6},
-      ()=>createTeam()
-    ),
+    "teamblind":[
+      createTeam("TEAM A"),
+      createTeam("TEAM B"),
+      createTeam("TEAM C"),
+      createTeam("TEAM D"),
+      createTeam("TEAM E"),
+      createTeam("TEAM F")
+    ],
 
-    "teamsolve": Array.from(
-      {length:6},
-      ()=>createTeam()
-    ),
+    "teamsolve":[
+      createTeam("TEAM A"),
+      createTeam("TEAM B"),
+      createTeam("TEAM C"),
+      createTeam("TEAM D"),
+      createTeam("TEAM E"),
+      createTeam("TEAM F")
+    ],
 
     "333finals": [],
     "222finals": [],
@@ -486,9 +518,9 @@ function init(){
 
 }
 
-/* ======================
-   FIREBASE SAVE/LOAD
-====================== */
+/* =========================
+   FIREBASE
+========================= */
 
 async function save(){
 
@@ -521,9 +553,9 @@ async function load(){
 
 }
 
-/* ======================
+/* =========================
    ADMIN
-====================== */
+========================= */
 
 function adminLogin(){
 
@@ -534,8 +566,8 @@ function adminLogin(){
 
     isAdmin = true;
 
-    document.getElementById("modeBox").innerHTML =
-      "🛠 Admin Mode";
+    document.getElementById("modeBox")
+      .innerHTML = "🛠 Admin Mode";
 
     renderAll();
 
@@ -547,9 +579,9 @@ function adminLogin(){
 
 }
 
-/* ======================
+/* =========================
    CALCULATIONS
-====================== */
+========================= */
 
 function calc(eventName,id){
 
@@ -628,8 +660,8 @@ function calc(eventName,id){
 
   }
 
-  let sorted = [...parsed]
-    .sort((a,b)=>a-b);
+  let sorted =
+    [...parsed].sort((a,b)=>a-b);
 
   sorted.shift();
   sorted.pop();
@@ -641,9 +673,9 @@ function calc(eventName,id){
 
 }
 
-/* ======================
-   UPDATE SCORE
-====================== */
+/* =========================
+   UPDATE TIME
+========================= */
 
 function updateTime(
   eventName,
@@ -667,9 +699,9 @@ function updateTime(
 
 }
 
-/* ======================
+/* =========================
    FINALS
-====================== */
+========================= */
 
 function cloneFinal(c,solves){
 
@@ -791,9 +823,9 @@ function genSolveFinals(){
 
 }
 
-/* ======================
+/* =========================
    NAVIGATION
-====================== */
+========================= */
 
 function showEvent(name,btn){
 
@@ -813,13 +845,14 @@ function showEvent(name,btn){
 
 }
 
-/* ======================
+/* =========================
    RENDER
-====================== */
+========================= */
 
 function renderAll(){
 
-  document.getElementById("content")
+  document
+    .getElementById("content")
     .innerHTML = "";
 
   render(current);
@@ -832,13 +865,13 @@ function render(eventName){
 
     "333":"3x3 Cube - First Round",
     "222":"2x2 Cube - First Round",
-    "teamblind":"Team Blind",
-    "teamsolve":"Team Solve",
+    "teamblind":"3x3 Team Blind",
+    "teamsolve":"3x3 Team Solve",
 
     "333finals":"🏆 3x3 Finals",
     "222finals":"🏆 2x2 Finals",
-    "teamblindfinals":"🏆 Blind Finals",
-    "teamsolvefinals":"🏆 Solve Finals"
+    "teamblindfinals":"🏆 Team Blind Finals",
+    "teamsolvefinals":"🏆 Team Solve Finals"
 
   };
 
@@ -889,9 +922,51 @@ function render(eventName){
 
     let rowClass = "";
 
-    if(index===0) rowClass="rank1";
-    if(index===1) rowClass="rank2";
-    if(index===2) rowClass="rank3";
+    /* =========================
+       QUALIFICATION HIGHLIGHTS
+    ========================= */
+
+    if(eventName === "333" && index < 8){
+      rowClass = "qualified";
+    }
+
+    if(eventName === "222" && index < 6){
+      rowClass = "qualified";
+    }
+
+    if(eventName === "teamblind" && index < 4){
+      rowClass = "qualified";
+    }
+
+    if(eventName === "teamsolve" && index < 4){
+      rowClass = "qualified";
+    }
+
+    /* =========================
+       FINALS PODIUMS
+    ========================= */
+
+    if(
+      eventName === "333finals" ||
+      eventName === "222finals"
+    ){
+
+      if(index === 0) rowClass = "rank1";
+      if(index === 1) rowClass = "rank2";
+      if(index === 2) rowClass = "rank3";
+
+    }
+
+    if(
+      eventName === "teamblindfinals" ||
+      eventName === "teamsolvefinals"
+    ){
+
+      if(index === 0){
+        rowClass = "rank1";
+      }
+
+    }
 
     html += `
       <tr class="${rowClass}">
@@ -948,14 +1023,15 @@ function render(eventName){
   </div>
   `;
 
-  document.getElementById("content")
+  document
+    .getElementById("content")
     .innerHTML = html;
 
 }
 
-/* ======================
-   LIVE FIREBASE SYNC
-====================== */
+/* =========================
+   LIVE SYNC
+========================= */
 
 db.collection("competition")
 .doc("main")
@@ -969,7 +1045,8 @@ db.collection("competition")
 
     if(isAdmin){
 
-      document.getElementById("modeBox")
+      document
+        .getElementById("modeBox")
         .innerHTML = "🛠 Admin Mode";
 
     }
@@ -978,9 +1055,9 @@ db.collection("competition")
 
 });
 
-/* ======================
+/* =========================
    START
-====================== */
+========================= */
 
 load();
 
@@ -988,4 +1065,3 @@ load();
 
 </body>
 </html>
-
