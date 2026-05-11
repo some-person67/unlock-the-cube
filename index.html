@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
   <title>Unlock the Cube: Competition</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <style>
 
@@ -109,9 +112,9 @@
       box-shadow:0 0 0 3px rgba(25,118,210,0.15);
     }
 
-    .readonlyInput{
-      background:#f5f5f5;
-      cursor:not-allowed;
+    .readonly{
+      background:#f2f2f2;
+      pointer-events:none;
     }
 
     .nameInput{
@@ -143,26 +146,24 @@
 
     .modeBox{
       position:fixed;
-      top:14px;
-      right:20px;
+      top:10px;
+      right:10px;
       background:white;
-      padding:10px 18px;
-      border-radius:12px;
+      padding:10px 14px;
+      border-radius:10px;
       font-weight:bold;
-      box-shadow:0 2px 8px rgba(0,0,0,0.15);
+      box-shadow:0 2px 10px rgba(0,0,0,0.2);
       z-index:999;
     }
 
   </style>
 </head>
 
-<body onload="checkAdmin()">
+<body>
 
   <div class="modeBox" id="modeBox">
-    Viewer Mode
+    👀 Viewer Mode
   </div>
-
-  <!-- SIDEBAR -->
 
   <div class="sidebar">
 
@@ -202,9 +203,11 @@
       🏆 Team Solve Finals
     </button>
 
-  </div>
+    <button class="eventBtn" onclick="adminLogin()">
+      🔒 Admin Login
+    </button>
 
-  <!-- MAIN -->
+  </div>
 
   <div class="main">
 
@@ -216,829 +219,828 @@
 
   </div>
 
-  <script>
+<script>
 
-    /* ADMIN */
+/* FIREBASE */
 
-    let isAdmin = false;
+const firebaseConfig = {
+  apiKey: "AIzaSyCKnH1kAR0z_3LtsHXNCBKQmF_VJLGl9ls",
+  authDomain: "unlock-the-cube-9abea.firebaseapp.com",
+  projectId: "unlock-the-cube-9abea",
+  storageBucket: "unlock-the-cube-9abea.firebasestorage.app",
+  messagingSenderId: "4778254984",
+  appId: "1:4778254984:web:728b7915b36ff9390e753d"
+};
 
-    function checkAdmin(){
+firebase.initializeApp(firebaseConfig);
 
-      const password = prompt(
-        "Enter admin password.\n\nPress cancel for viewer mode."
-      );
+const db = firebase.firestore();
 
-      if(password === "cubingsabbat67"){
+/* ADMIN */
 
-        isAdmin = true;
+let isAdmin = false;
 
-        document.getElementById("modeBox")
-          .innerHTML = "🛠 Admin Mode";
+function adminLogin(){
 
-      }
+  const password = prompt(
+    "Enter admin password"
+  );
 
-      else{
+  if(password === "cubing123"){
 
-        isAdmin = false;
+    isAdmin = true;
 
-        document.getElementById("modeBox")
-          .innerHTML = "👀 Viewer Mode";
+    document.getElementById("modeBox")
+      .innerHTML = "🛠 Admin Mode";
 
-      }
+    renderAll();
 
+  }
+
+  else{
+
+    alert("Wrong password");
+
+  }
+
+}
+
+/* NAMES */
+
+let names = [
+  "ALBERT ANGGAKUSUMA",
+  "CHONG YI XUAN",
+  "DARRYL LEE CHENG ZHE",
+  "ETHAN LEE YIH HERNG",
+  "GUO RUIXUAN",
+  "HAN YICHEN",
+  "KANG PIN YUAN CALLUM",
+  "KHONG JING KAI, BRANDON",
+  "KOH WENRYN",
+  "KOO JIA KAI",
+  "KYAN WANG JIAKAI",
+  "LI MINGCAN ADRIAL",
+  "LIM JUN YI",
+  "LIN JING'AN JEREMY",
+  "LOH ZHENG YU",
+  "LOW ZE JUN JERRY",
+  "LU SHENGBO ETHAN",
+  "NG YU YANG, LUCAS",
+  "SHENG ZHOUYI",
+  "SUN JIAHAO",
+  "WANG HAO YANG",
+  "XANTHUS CHO XUAN ZHE",
+  "YANG XIUXUAN",
+  "YIO CHEUK YUEN JAYDEN",
+  "ZHENG YONGCHENG"
+];
+
+/* EVENTS */
+
+let events = {
+  "333": [],
+  "222": [],
+  "teamblind": [],
+  "teamsolve": [],
+  "333finals": [],
+  "222finals": [],
+  "teamblindfinals": [],
+  "teamsolvefinals": []
+};
+
+/* DEFAULT DATA */
+
+function createDefaultData(){
+
+  events = {
+    "333": [],
+    "222": [],
+    "teamblind": [],
+    "teamsolve": [],
+    "333finals": [],
+    "222finals": [],
+    "teamblindfinals": [],
+    "teamsolvefinals": []
+  };
+
+  names.forEach(name=>{
+
+    events["333"].push({
+      name:name,
+      times:["","","","",""],
+      avg:null,
+      best:null
+    });
+
+    events["222"].push({
+      name:name,
+      times:["","","","",""],
+      avg:null,
+      best:null
+    });
+
+  });
+
+  for(let i=0;i<8;i++){
+
+    events["teamblind"].push({
+      member1:"",
+      member2:"",
+      times:["","",""],
+      avg:null,
+      best:null
+    });
+
+    events["teamsolve"].push({
+      member1:"",
+      member2:"",
+      times:["","",""],
+      avg:null,
+      best:null
+    });
+
+  }
+
+}
+
+/* LOAD */
+
+async function loadData(){
+
+  const doc = await db
+    .collection("competition")
+    .doc("main")
+    .get();
+
+  if(doc.exists){
+
+    events = doc.data();
+
+  }
+
+  else{
+
+    createDefaultData();
+
+    await saveData();
+
+  }
+
+  renderAll();
+
+}
+
+/* SAVE */
+
+async function saveData(){
+
+  await db
+    .collection("competition")
+    .doc("main")
+    .set(events);
+
+}
+
+/* CALCULATE */
+
+function calculate(event,index){
+
+  let c = events[event][index];
+
+  let raw = c.times;
+
+  if(raw.some(t=>t==="")){
+
+    c.avg=null;
+    c.best=null;
+    return;
+
+  }
+
+  let parsed = raw.map(t=>{
+
+    if(String(t).toUpperCase()==="DNF")
+      return "DNF";
+
+    return Number(t);
+
+  });
+
+  let nums = parsed.filter(x=>x!=="DNF");
+
+  c.best = nums.length
+    ? Math.min(...nums)
+    : "DNF";
+
+  let dnf = parsed.filter(x=>x==="DNF").length;
+
+  if(event.includes("team")){
+
+    if(dnf>=1){
+      c.avg="DNF";
+      return;
     }
 
-    /* NAMES */
+    c.avg =
+      parsed.reduce((a,b)=>a+b,0)
+      /parsed.length;
 
-    let names = [
+    return;
 
-      "ALBERT ANGGAKUSUMA",
-      "CHONG YI XUAN",
-      "DARRYL LEE CHENG ZHE",
-      "ETHAN LEE YIH HERNG",
-      "GUO RUIXUAN",
-      "HAN YICHEN",
-      "KANG PIN YUAN CALLUM",
-      "KHONG JING KAI, BRANDON",
-      "KOH WENRYN",
-      "KOO JIA KAI",
-      "KYAN WANG JIAKAI",
-      "LI MINGCAN ADRIAL",
-      "LIM JUN YI",
-      "LIN JING'AN JEREMY",
-      "LOH ZHENG YU",
-      "LOW ZE JUN JERRY",
-      "LU SHENGBO ETHAN",
-      "NG YU YANG, LUCAS",
-      "SHENG ZHOUYI",
-      "SUN JIAHAO",
-      "WANG HAO YANG",
-      "XANTHUS CHO XUAN ZHE",
-      "YANG XIUXUAN",
-      "YIO CHEUK YUEN JAYDEN",
-      "ZHENG YONGCHENG"
+  }
 
-    ];
+  if(dnf>=2){
+    c.avg="DNF";
+    return;
+  }
 
-    /* EVENTS */
+  if(dnf===1){
 
-    let events = {
+    let arr = parsed.filter(x=>x!=="DNF");
 
-      "333": [],
-      "222": [],
-      "teamblind": [],
-      "teamsolve": [],
+    let best = Math.min(...arr);
 
-      "333finals": [],
-      "222finals": [],
-      "teamblindfinals": [],
-      "teamsolvefinals": []
+    arr.splice(arr.indexOf(best),1);
 
-    };
+    c.avg =
+      arr.reduce((a,b)=>a+b,0)
+      /3;
 
-    /* CREATE INDIVIDUAL EVENTS */
+    return;
 
-    names.forEach(name=>{
+  }
 
-      events["333"].push({
+  let sorted = [...parsed].sort((a,b)=>a-b);
 
-        name:name,
-        times:["","","","",""],
-        avg:null,
-        best:null
+  sorted.shift();
+  sorted.pop();
 
-      });
+  c.avg =
+    sorted.reduce((a,b)=>a+b,0)
+    /3;
 
-      events["222"].push({
+}
 
-        name:name,
-        times:["","","","",""],
-        avg:null,
-        best:null
+/* UPDATE TIME */
 
-      });
+async function updateTime(
+  event,
+  index,
+  solve,
+  value
+){
+
+  if(!isAdmin) return;
+
+  events[event][index]
+    .times[solve]=value;
+
+  calculate(event,index);
+
+  await saveData();
+
+  renderAll();
+
+}
+
+/* UPDATE NAME */
+
+async function updateName(
+  event,
+  index,
+  key,
+  value
+){
+
+  if(!isAdmin) return;
+
+  events[event][index][key]=value;
+
+  await saveData();
+
+}
+
+/* SHOW EVENT */
+
+function showEvent(event){
+
+  Object.keys(events).forEach(e=>{
+
+    let section =
+      document.getElementById("section"+e);
+
+    let button =
+      document.getElementById("btn"+e);
+
+    if(section)
+      section.classList.add("hidden");
+
+    if(button)
+      button.classList.remove("activeEvent");
+
+  });
+
+  document
+    .getElementById("section"+event)
+    .classList.remove("hidden");
+
+  let btn = document.getElementById("btn"+event);
+
+  if(btn)
+    btn.classList.add("activeEvent");
+
+}
+
+/* RENDER */
+
+function render(event){
+
+  let tbody =
+    document.getElementById(
+      "table"+event
+    );
+
+  tbody.innerHTML="";
+
+  let ranked =
+    [...events[event]];
+
+  if(
+    event==="333" ||
+    event==="222" ||
+    event==="333finals" ||
+    event==="222finals"
+  ){
+
+    ranked.sort((a,b)=>{
+
+      if(a.avg===null) return 1;
+      if(b.avg===null) return -1;
+
+      if(a.avg==="DNF") return 1;
+      if(b.avg==="DNF") return -1;
+
+      return a.avg-b.avg;
 
     });
 
-    /* CREATE TEAM EVENTS */
+  }
 
-    for(let i=0;i<8;i++){
+  else{
 
-      events["teamblind"].push({
+    ranked.sort((a,b)=>{
 
-        member1:"",
-        member2:"",
-        times:["","",""],
-        avg:null,
-        best:null
+      if(a.best===null) return 1;
+      if(b.best===null) return -1;
 
-      });
+      if(a.best==="DNF") return 1;
+      if(b.best==="DNF") return -1;
 
-      events["teamsolve"].push({
+      return a.best-b.best;
 
-        member1:"",
-        member2:"",
-        times:["","",""],
-        avg:null,
-        best:null
+    });
 
-      });
+  }
 
-    }
+  ranked.forEach((c,index)=>{
 
-    /* SHOW EVENT */
+    let tr = document.createElement("tr");
 
-    function showEvent(event){
+    let green="";
 
-      Object.keys(events).forEach(e=>{
+    if(event==="333" && index<8)
+      green="green";
 
-        let section =
-          document.getElementById("section"+e);
+    if(event==="222" && index<6)
+      green="green";
 
-        let button =
-          document.getElementById("btn"+e);
+    if(event==="teamblind" && index<4)
+      green="green";
 
-        if(section)
-          section.classList.add("hidden");
+    if(event==="teamsolve" && index<4)
+      green="green";
 
-        if(button)
-          button.classList.remove("activeEvent");
+    if(event==="333finals" && index<3)
+      green="gold";
 
-      });
+    if(event==="222finals" && index<3)
+      green="gold";
 
-      document
-        .getElementById("section"+event)
-        .classList.remove("hidden");
+    if(event==="teamblindfinals" && index<1)
+      green="gold";
 
-      document
-        .getElementById("btn"+event)
-        .classList.add("activeEvent");
+    if(event==="teamsolvefinals" && index<1)
+      green="gold";
 
-    }
+    let team = event.includes("team");
 
-    /* CALCULATE */
+    let solves = team ? 3 : 5;
 
-    function calculate(event,index){
+    let nameHTML="";
 
-      let c = events[event][index];
+    if(team){
 
-      let raw = c.times;
+      nameHTML=`
 
-      if(raw.some(t=>t==="")){
+        <td>
+          <input
+            class="teamInput ${!isAdmin ? 'readonly' : ''}"
+            value="${c.member1}"
+            onchange="
+              updateName(
+                '${event}',
+                ${events[event].indexOf(c)},
+                'member1',
+                this.value
+              )
+            "
+          >
+        </td>
 
-        c.avg=null;
-        c.best=null;
-        return;
-
-      }
-
-      let parsed = raw.map(t=>{
-
-        if(
-          String(t).toUpperCase()==="DNF"
-        )
-          return "DNF";
-
-        return Number(t);
-
-      });
-
-      let nums =
-        parsed.filter(x=>x!=="DNF");
-
-      c.best =
-        nums.length
-        ? Math.min(...nums)
-        : "DNF";
-
-      let dnf =
-        parsed.filter(x=>x==="DNF").length;
-
-      if(event.includes("team")){
-
-        if(dnf>=1){
-
-          c.avg="DNF";
-          return;
-
-        }
-
-        c.avg =
-          parsed.reduce((a,b)=>a+b,0)
-          /parsed.length;
-
-        return;
-
-      }
-
-      if(dnf>=2){
-
-        c.avg="DNF";
-        return;
-
-      }
-
-      if(dnf===1){
-
-        let arr =
-          parsed.filter(x=>x!=="DNF");
-
-        let best =
-          Math.min(...arr);
-
-        arr.splice(
-          arr.indexOf(best),
-          1
-        );
-
-        c.avg =
-          arr.reduce((a,b)=>a+b,0)
-          /3;
-
-        return;
-
-      }
-
-      let sorted =
-        [...parsed].sort((a,b)=>a-b);
-
-      sorted.shift();
-      sorted.pop();
-
-      c.avg =
-        sorted.reduce((a,b)=>a+b,0)
-        /3;
-
-    }
-
-    /* UPDATE TIME */
-
-    function updateTime(
-      event,
-      index,
-      solve,
-      value
-    ){
-
-      if(!isAdmin) return;
-
-      events[event][index]
-        .times[solve]=value;
-
-      calculate(event,index);
-
-      render(event);
-
-    }
-
-    /* UPDATE NAME */
-
-    function updateName(
-      event,
-      index,
-      key,
-      value
-    ){
-
-      if(!isAdmin) return;
-
-      events[event][index][key]=value;
-
-    }
-
-    /* RENDER */
-
-    function render(event){
-
-      let tbody =
-        document.getElementById(
-          "table"+event
-        );
-
-      tbody.innerHTML="";
-
-      let ranked =
-        [...events[event]];
-
-      if(
-        event==="333" ||
-        event==="222" ||
-        event==="333finals" ||
-        event==="222finals"
-      ){
-
-        ranked.sort((a,b)=>{
-
-          if(a.avg===null) return 1;
-          if(b.avg===null) return -1;
-
-          if(a.avg==="DNF") return 1;
-          if(b.avg==="DNF") return -1;
-
-          return a.avg-b.avg;
-
-        });
-
-      }
-
-      else{
-
-        ranked.sort((a,b)=>{
-
-          if(a.best===null) return 1;
-          if(b.best===null) return -1;
-
-          if(a.best==="DNF") return 1;
-          if(b.best==="DNF") return -1;
-
-          return a.best-b.best;
-
-        });
-
-      }
-
-      ranked.forEach((c,index)=>{
-
-        let tr =
-          document.createElement("tr");
-
-        let green="";
-
-        if(event==="333" && index<8)
-          green="green";
-
-        if(event==="222" && index<6)
-          green="green";
-
-        if(event==="teamblind" && index<4)
-          green="green";
-
-        if(event==="teamsolve" && index<4)
-          green="green";
-
-        if(event==="333finals" && index<3)
-          green="gold";
-
-        if(event==="222finals" && index<3)
-          green="gold";
-
-        if(event==="teamblindfinals" && index<1)
-          green="gold";
-
-        if(event==="teamsolvefinals" && index<1)
-          green="gold";
-
-        let team =
-          event.includes("team");
-
-        let solves =
-          team ? 3 : 5;
-
-        let readonly =
-          !isAdmin
-          ? "readonly class='readonlyInput'"
-          : "";
-
-        let nameHTML="";
-
-        if(team){
-
-          nameHTML=`
-
-            <td>
-
-              <input
-                class="teamInput ${!isAdmin ? 'readonlyInput' : ''}"
-                value="${c.member1}"
-                ${!isAdmin ? "readonly" : ""}
-
-                onchange="
-                  updateName(
-                    '${event}',
-                    ${events[event].indexOf(c)},
-                    'member1',
-                    this.value
-                  )
-                "
-              >
-
-            </td>
-
-            <td>
-
-              <input
-                class="teamInput ${!isAdmin ? 'readonlyInput' : ''}"
-                value="${c.member2}"
-                ${!isAdmin ? "readonly" : ""}
-
-                onchange="
-                  updateName(
-                    '${event}',
-                    ${events[event].indexOf(c)},
-                    'member2',
-                    this.value
-                  )
-                "
-              >
-
-            </td>
-
-          `;
-
-        }
-
-        else{
-
-          nameHTML=`
-
-            <td>
-
-              <input
-                class="nameInput ${!isAdmin ? 'readonlyInput' : ''}"
-                value="${c.name}"
-                ${!isAdmin ? "readonly" : ""}
-
-                onchange="
-                  updateName(
-                    '${event}',
-                    ${events[event].indexOf(c)},
-                    'name',
-                    this.value
-                  )
-                "
-              >
-
-            </td>
-
-          `;
-
-        }
-
-        let solveHTML="";
-
-        for(let i=0;i<solves;i++){
-
-          solveHTML += `
-
-            <td>
-
-              <input
-                value="${c.times[i]}"
-                ${!isAdmin ? "readonly" : ""}
-                class="${!isAdmin ? 'readonlyInput' : ''}"
-
-                onchange="
-                  updateTime(
-                    '${event}',
-                    ${events[event].indexOf(c)},
-                    ${i},
-                    this.value
-                  )
-                "
-              >
-
-            </td>
-
-          `;
-
-        }
-
-        tr.innerHTML=`
-
-          <td>
-            <div class="rankBox ${green}">
-              ${index+1}
-            </div>
-          </td>
-
-          ${nameHTML}
-
-          ${solveHTML}
-
-          <td>
-
-            ${
-              c.avg===null
-              ? "-"
-              : c.avg==="DNF"
-                ? "DNF"
-                : c.avg.toFixed(2)
-            }
-
-          </td>
-
-          <td>
-
-            ${
-              c.best===null
-              ? "-"
-              : c.best==="DNF"
-                ? "DNF"
-                : c.best.toFixed(2)
-            }
-
-          </td>
-
-        `;
-
-        tbody.appendChild(tr);
-
-      });
-
-    }
-
-    /* GENERATE FINALS */
-
-    function generate333Finals(){
-
-      if(!isAdmin) return;
-
-      events["333finals"] =
-
-        [...events["333"]]
-
-        .filter(c=>
-          c.avg!==null &&
-          c.avg!=="DNF"
-        )
-
-        .sort((a,b)=>
-          a.avg-b.avg
-        )
-
-        .slice(0,8)
-
-        .map(c=>({
-
-          name:c.name,
-          times:["","","","",""],
-          avg:null,
-          best:null
-
-        }));
-
-      render("333finals");
-
-      showEvent("333finals");
-
-    }
-
-    function generate222Finals(){
-
-      if(!isAdmin) return;
-
-      events["222finals"] =
-
-        [...events["222"]]
-
-        .filter(c=>
-          c.avg!==null &&
-          c.avg!=="DNF"
-        )
-
-        .sort((a,b)=>
-          a.avg-b.avg
-        )
-
-        .slice(0,6)
-
-        .map(c=>({
-
-          name:c.name,
-          times:["","","","",""],
-          avg:null,
-          best:null
-
-        }));
-
-      render("222finals");
-
-      showEvent("222finals");
-
-    }
-
-    function generateBlindFinals(){
-
-      if(!isAdmin) return;
-
-      events["teamblindfinals"] =
-
-        [...events["teamblind"]]
-
-        .filter(c=>
-          c.best!==null &&
-          c.best!=="DNF"
-        )
-
-        .sort((a,b)=>
-          a.best-b.best
-        )
-
-        .slice(0,4)
-
-        .map(c=>({
-
-          member1:c.member1,
-          member2:c.member2,
-          times:["","",""],
-          avg:null,
-          best:null
-
-        }));
-
-      render("teamblindfinals");
-
-      showEvent("teamblindfinals");
-
-    }
-
-    function generateSolveFinals(){
-
-      if(!isAdmin) return;
-
-      events["teamsolvefinals"] =
-
-        [...events["teamsolve"]]
-
-        .filter(c=>
-          c.best!==null &&
-          c.best!=="DNF"
-        )
-
-        .sort((a,b)=>
-          a.best-b.best
-        )
-
-        .slice(0,4)
-
-        .map(c=>({
-
-          member1:c.member1,
-          member2:c.member2,
-          times:["","",""],
-          avg:null,
-          best:null
-
-        }));
-
-      render("teamsolvefinals");
-
-      showEvent("teamsolvefinals");
-
-    }
-
-    /* CREATE SECTION */
-
-    function createSection(
-      event,
-      title,
-      solves,
-      team=false
-    ){
-
-      let solveHeaders="";
-
-      for(let i=1;i<=solves;i++){
-
-        solveHeaders += `<th>${i}</th>`;
-
-      }
-
-      let names = team
-
-        ? `
-          <th>Member 1</th>
-          <th>Member 2</th>
-        `
-
-        : `
-          <th>Name</th>
-        `;
-
-      return `
-
-        <div
-          class="section hidden"
-          id="section${event}"
-        >
-
-          <div class="title">
-            ${title}
-          </div>
-
-          <table>
-
-            <thead>
-
-              <tr>
-
-                <th>#</th>
-
-                ${names}
-
-                ${solveHeaders}
-
-                <th>Average</th>
-                <th>Best</th>
-
-              </tr>
-
-            </thead>
-
-            <tbody id="table${event}"></tbody>
-
-          </table>
-
-        </div>
+        <td>
+          <input
+            class="teamInput ${!isAdmin ? 'readonly' : ''}"
+            value="${c.member2}"
+            onchange="
+              updateName(
+                '${event}',
+                ${events[event].indexOf(c)},
+                'member2',
+                this.value
+              )
+            "
+          >
+        </td>
 
       `;
 
     }
 
-    /* CREATE ALL SECTIONS */
+    else{
 
-    document.getElementById("content").innerHTML =
+      nameHTML=`
 
-      createSection(
-        "333",
-        "3x3x3 Cube - First Round",
-        5
+        <td>
+          <input
+            class="nameInput ${!isAdmin ? 'readonly' : ''}"
+            value="${c.name}"
+            onchange="
+              updateName(
+                '${event}',
+                ${events[event].indexOf(c)},
+                'name',
+                this.value
+              )
+            "
+          >
+        </td>
+
+      `;
+
+    }
+
+    let solveHTML="";
+
+    for(let i=0;i<solves;i++){
+
+      solveHTML += `
+
+        <td>
+          <input
+            class="${!isAdmin ? 'readonly' : ''}"
+            value="${c.times[i]}"
+            onchange="
+              updateTime(
+                '${event}',
+                ${events[event].indexOf(c)},
+                ${i},
+                this.value
+              )
+            "
+          >
+        </td>
+
+      `;
+
+    }
+
+    tr.innerHTML=`
+
+      <td>
+        <div class="rankBox ${green}">
+          ${index+1}
+        </div>
+      </td>
+
+      ${nameHTML}
+
+      ${solveHTML}
+
+      <td>
+        ${
+          c.avg===null
+          ? "-"
+          : c.avg==="DNF"
+            ? "DNF"
+            : c.avg.toFixed(2)
+        }
+      </td>
+
+      <td>
+        ${
+          c.best===null
+          ? "-"
+          : c.best==="DNF"
+            ? "DNF"
+            : c.best.toFixed(2)
+        }
+      </td>
+
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+
+}
+
+/* GENERATE FINALS */
+
+async function generate333Finals(){
+
+  if(!isAdmin) return;
+
+  events["333finals"] =
+    [...events["333"]]
+      .filter(c=>
+        c.avg!==null &&
+        c.avg!=="DNF"
       )
+      .sort((a,b)=>a.avg-b.avg)
+      .slice(0,8)
+      .map(c=>({
+        name:c.name,
+        times:["","","","",""],
+        avg:null,
+        best:null
+      }));
 
-      +
+  await saveData();
 
-      createSection(
-        "222",
-        "2x2x2 Cube - First Round",
-        5
+  render("333finals");
+
+  showEvent("333finals");
+
+}
+
+async function generate222Finals(){
+
+  if(!isAdmin) return;
+
+  events["222finals"] =
+    [...events["222"]]
+      .filter(c=>
+        c.avg!==null &&
+        c.avg!=="DNF"
       )
+      .sort((a,b)=>a.avg-b.avg)
+      .slice(0,6)
+      .map(c=>({
+        name:c.name,
+        times:["","","","",""],
+        avg:null,
+        best:null
+      }));
 
-      +
+  await saveData();
 
-      createSection(
-        "teamblind",
-        "3x3 Team Blind",
-        3,
-        true
+  render("222finals");
+
+  showEvent("222finals");
+
+}
+
+async function generateBlindFinals(){
+
+  if(!isAdmin) return;
+
+  events["teamblindfinals"] =
+    [...events["teamblind"]]
+      .filter(c=>
+        c.best!==null &&
+        c.best!=="DNF"
       )
+      .sort((a,b)=>a.best-b.best)
+      .slice(0,4)
+      .map(c=>({
+        member1:c.member1,
+        member2:c.member2,
+        times:["","",""],
+        avg:null,
+        best:null
+      }));
 
-      +
+  await saveData();
 
-      createSection(
-        "teamsolve",
-        "3x3 Team Solve",
-        3,
-        true
+  render("teamblindfinals");
+
+  showEvent("teamblindfinals");
+
+}
+
+async function generateSolveFinals(){
+
+  if(!isAdmin) return;
+
+  events["teamsolvefinals"] =
+    [...events["teamsolve"]]
+      .filter(c=>
+        c.best!==null &&
+        c.best!=="DNF"
       )
+      .sort((a,b)=>a.best-b.best)
+      .slice(0,4)
+      .map(c=>({
+        member1:c.member1,
+        member2:c.member2,
+        times:["","",""],
+        avg:null,
+        best:null
+      }));
 
-      +
+  await saveData();
 
-      createSection(
-        "333finals",
-        "3x3 Finals",
-        5
-      )
+  render("teamsolvefinals");
 
-      +
+  showEvent("teamsolvefinals");
 
-      createSection(
-        "222finals",
-        "2x2 Finals",
-        5
-      )
+}
 
-      +
+/* CREATE SECTION */
 
-      createSection(
-        "teamblindfinals",
-        "3x3 Team Blind Finals",
-        3,
-        true
-      )
+function createSection(
+  event,
+  title,
+  solves,
+  team=false
+){
 
-      +
+  let solveHeaders="";
 
-      createSection(
-        "teamsolvefinals",
-        "3x3 Team Solve Finals",
-        3,
-        true
-      );
+  for(let i=1;i<=solves;i++){
+    solveHeaders += `<th>${i}</th>`;
+  }
 
-    /* INITIAL RENDER */
+  let names = team
+    ? `
+      <th>Member 1</th>
+      <th>Member 2</th>
+    `
+    : `
+      <th>Name</th>
+    `;
 
-    showEvent("333");
+  return `
 
-    render("333");
-    render("222");
-    render("teamblind");
-    render("teamsolve");
-    render("333finals");
-    render("222finals");
-    render("teamblindfinals");
-    render("teamsolvefinals");
+    <div
+      class="section hidden"
+      id="section${event}"
+    >
 
-  </script>
+      <div class="title">
+        ${title}
+      </div>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>#</th>
+            ${names}
+            ${solveHeaders}
+            <th>Average</th>
+            <th>Best</th>
+          </tr>
+        </thead>
+
+        <tbody id="table${event}"></tbody>
+
+      </table>
+
+    </div>
+
+  `;
+
+}
+
+/* CREATE SECTIONS */
+
+document.getElementById("content").innerHTML =
+
+  createSection(
+    "333",
+    "3x3x3 Cube - First Round",
+    5
+  )
+
+  +
+
+  createSection(
+    "222",
+    "2x2x2 Cube - First Round",
+    5
+  )
+
+  +
+
+  createSection(
+    "teamblind",
+    "3x3 Team Blind",
+    3,
+    true
+  )
+
+  +
+
+  createSection(
+    "teamsolve",
+    "3x3 Team Solve",
+    3,
+    true
+  )
+
+  +
+
+  createSection(
+    "333finals",
+    "3x3 Finals",
+    5
+  )
+
+  +
+
+  createSection(
+    "222finals",
+    "2x2 Finals",
+    5
+  )
+
+  +
+
+  createSection(
+    "teamblindfinals",
+    "3x3 Team Blind Finals",
+    3,
+    true
+  )
+
+  +
+
+  createSection(
+    "teamsolvefinals",
+    "3x3 Team Solve Finals",
+    3,
+    true
+  );
+
+/* RENDER ALL */
+
+function renderAll(){
+
+  render("333");
+  render("222");
+  render("teamblind");
+  render("teamsolve");
+  render("333finals");
+  render("222finals");
+  render("teamblindfinals");
+  render("teamsolvefinals");
+
+  showEvent("333");
+
+}
+
+/* LIVE SYNC */
+
+db.collection("competition")
+  .doc("main")
+  .onSnapshot((doc)=>{
+
+    if(doc.exists){
+
+      events = doc.data();
+
+      renderAll();
+
+    }
+
+  });
+
+/* START */
+
+loadData();
+
+</script>
 
 </body>
 </html>
