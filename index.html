@@ -3,66 +3,375 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Unlock the Cube: Competition</title>
+<title>Unlock the Cube</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-body{margin:0;font-family:Arial;background:#f3f4f6;}
-.sidebar{width:270px;position:fixed;height:100vh;background:white;border-right:1px solid #ddd;overflow:auto;}
-.main{margin-left:270px;}
-.header{background:#1976d2;color:white;padding:14px 30px;font-size:24px;font-weight:bold;}
-.section{padding:35px;}
-.hidden{display:none;}
-.eventBtn{width:100%;padding:18px;border:none;text-align:left;background:white;border-bottom:1px solid #eee;cursor:pointer;}
-.eventBtn:hover{background:#f5f5f5;}
-.activeEvent{background:#e8f0fe;color:#1565c0;font-weight:bold;}
-table{width:100%;border-collapse:collapse;background:white;border-radius:14px;overflow:hidden;}
-th,td{padding:10px;text-align:center;border-bottom:1px solid #eee;}
-input{width:90px;padding:6px;border:1px solid #ccc;border-radius:6px;text-align:center;}
-.readonly{background:#eee;pointer-events:none;}
-.rankBox{padding:8px;border-radius:6px;font-weight:bold;background:#ececec;}
-.green{background:#00e676;}
-.gold{background:#ffd600;}
-.modeBox{position:fixed;top:10px;right:10px;background:white;padding:10px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.2);}
-.loginBox{position:fixed;bottom:10px;right:10px;background:white;padding:10px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.2);}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(circle at top left,#2563eb22 0%,transparent 30%),
+    radial-gradient(circle at bottom right,#7c3aed22 0%,transparent 30%),
+    #0f172a;
+  color:white;
+  min-height:100vh;
+}
+
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  width:270px;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(16px);
+  border-right:1px solid rgba(255,255,255,0.08);
+  padding:22px;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:800;
+  margin-bottom:30px;
+}
+
+.sideTitle{
+  font-size:12px;
+  opacity:0.55;
+  text-transform:uppercase;
+  margin:18px 0 10px;
+  letter-spacing:1px;
+}
+
+.eventBtn{
+  width:100%;
+  border:none;
+  background:transparent;
+  color:white;
+  padding:14px 16px;
+  border-radius:14px;
+  text-align:left;
+  cursor:pointer;
+  font-weight:600;
+  margin-bottom:8px;
+  transition:.2s;
+}
+
+.eventBtn:hover{
+  background:rgba(255,255,255,0.08);
+  transform:translateX(4px);
+}
+
+.activeEvent{
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+/* MAIN */
+
+.main{
+  flex:1;
+  padding:28px;
+}
+
+.topBar{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:24px;
+}
+
+.hero{
+  flex:1;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+  padding:30px;
+  border-radius:30px;
+  box-shadow:0 20px 40px rgba(0,0,0,.35);
+}
+
+.hero h1{
+  margin:0;
+  font-size:42px;
+  font-weight:800;
+}
+
+.hero p{
+  margin-top:10px;
+  opacity:.9;
+}
+
+.adminPanel{
+  width:320px;
+}
+
+.modeBox{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:16px;
+  font-weight:700;
+  margin-bottom:14px;
+}
+
+.loginBox{
+  display:flex;
+  gap:10px;
+}
+
+.loginBox input{
+  flex:1;
+}
+
+/* CARD */
+
+.card{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:30px;
+  overflow:hidden;
+  backdrop-filter:blur(18px);
+  box-shadow:0 15px 40px rgba(0,0,0,.3);
+}
+
+.cardHeader{
+  padding:24px 28px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  font-size:24px;
+  font-weight:800;
+}
+
+.tableWrap{
+  overflow-x:auto;
+}
+
+/* TABLE */
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:rgba(255,255,255,.04);
+  color:#93c5fd;
+  text-transform:uppercase;
+  font-size:12px;
+  letter-spacing:1px;
+}
+
+th,td{
+  padding:16px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+tr:hover{
+  background:rgba(255,255,255,.03);
+}
+
+/* RANKS */
+
+.rank1{
+  background:rgba(250,204,21,.16);
+}
+
+.rank2{
+  background:rgba(209,213,219,.12);
+}
+
+.rank3{
+  background:rgba(251,146,60,.12);
+}
+
+/* INPUTS */
+
+.scoreInput{
+  width:80px;
+  text-align:center;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:10px;
+  color:white;
+  outline:none;
+}
+
+.scoreInput:focus{
+  border-color:#60a5fa;
+}
+
+.readonly{
+  opacity:.65;
+  pointer-events:none;
+}
+
+/* BUTTONS */
+
+button{
+  border:none;
+  border-radius:12px;
+  padding:12px 16px;
+  cursor:pointer;
+  font-weight:700;
+  color:white;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+button:hover{
+  opacity:.92;
+}
+
+/* MOBILE */
+
+@media(max-width:950px){
+
+  .app{
+    flex-direction:column;
+  }
+
+  .sidebar{
+    width:100%;
+  }
+
+  .topBar{
+    flex-direction:column;
+  }
+
+  .adminPanel{
+    width:100%;
+  }
+
+}
+
 </style>
 </head>
-
 <body>
 
-<div class="modeBox" id="modeBox">👀 Viewer Mode</div>
+<div class="app">
 
-<div class="loginBox">
-  <input id="pass" placeholder="Admin password"/>
-  <button onclick="adminLogin()">Login</button>
-</div>
+<!-- SIDEBAR -->
 
 <div class="sidebar">
-  <div class="p-6 text-2xl font-bold border-b">🧩 Events</div>
 
-  <button class="eventBtn activeEvent" onclick="showEvent('333')">3x3</button>
-  <button class="eventBtn" onclick="showEvent('222')">2x2</button>
-  <button class="eventBtn" onclick="showEvent('teamblind')">Team Blind</button>
-  <button class="eventBtn" onclick="showEvent('teamsolve')">Team Solve</button>
+<div class="logo">🧩 Unlock the Cube</div>
 
-  <button class="eventBtn" onclick="gen333Finals()">🏆 3x3 Finals</button>
-  <button class="eventBtn" onclick="gen222Finals()">🏆 2x2 Finals</button>
-  <button class="eventBtn" onclick="genBlindFinals()">🏆 Blind Finals</button>
-  <button class="eventBtn" onclick="genSolveFinals()">🏆 Solve Finals</button>
+<div class="sideTitle">Events</div>
+
+<button class="eventBtn activeEvent" onclick="showEvent('333',this)">
+3x3 Cube
+</button>
+
+<button class="eventBtn" onclick="showEvent('222',this)">
+2x2 Cube
+</button>
+
+<button class="eventBtn" onclick="showEvent('teamblind',this)">
+Team Blind
+</button>
+
+<button class="eventBtn" onclick="showEvent('teamsolve',this)">
+Team Solve
+</button>
+
+<div class="sideTitle">Generate Finals</div>
+
+<button class="eventBtn" onclick="gen333Finals()">
+🏆 Generate 3x3 Finals
+</button>
+
+<button class="eventBtn" onclick="gen222Finals()">
+🏆 Generate 2x2 Finals
+</button>
+
+<button class="eventBtn" onclick="genBlindFinals()">
+🏆 Generate Blind Finals
+</button>
+
+<button class="eventBtn" onclick="genSolveFinals()">
+🏆 Generate Solve Finals
+</button>
+
+<div class="sideTitle">Finals</div>
+
+<button class="eventBtn" onclick="showEvent('333finals',this)">
+🏆 3x3 Finals
+</button>
+
+<button class="eventBtn" onclick="showEvent('222finals',this)">
+🏆 2x2 Finals
+</button>
+
+<button class="eventBtn" onclick="showEvent('teamblindfinals',this)">
+🏆 Blind Finals
+</button>
+
+<button class="eventBtn" onclick="showEvent('teamsolvefinals',this)">
+🏆 Solve Finals
+</button>
+
 </div>
 
+<!-- MAIN -->
+
 <div class="main">
-<div class="header">Unlock the Cube</div>
+
+<div class="topBar">
+
+<div class="hero">
+<h1>Unlock the Cube</h1>
+<p>Professional Cubing Competition Dashboard</p>
+</div>
+
+<div class="adminPanel">
+
+<div class="modeBox" id="modeBox">
+👀 Viewer Mode
+</div>
+
+<div class="loginBox">
+<input
+type="password"
+id="adminPass"
+placeholder="Admin password"
+class="scoreInput"
+/>
+
+<button onclick="adminLogin()">
+Login
+</button>
+</div>
+
+</div>
+
+</div>
+
 <div id="content"></div>
+
+</div>
+
 </div>
 
 <script>
 
-/* FIREBASE */
+/* ======================
+   FIREBASE
+====================== */
+
 const firebaseConfig = {
   apiKey: "AIzaSyCKnH1kAR0z_3LtsHXNCBKQmF_VJLGl9ls",
   authDomain: "unlock-the-cube-9abea.firebaseapp.com",
@@ -70,259 +379,613 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const db = firebase.firestore();
 
-/* STATE */
+/* ======================
+   STATE
+====================== */
+
 let isAdmin = false;
-let events = {};
 let current = "333";
 
-/* ADMIN (FIXED) */
-function adminLogin(){
+let events = {};
 
-  const password = document.getElementById("pass").value;
+/* ======================
+   HELPERS
+====================== */
 
-  if(password === "cubing123"){
-    isAdmin = true;
+function createCompetitor(name){
 
-    document.getElementById("modeBox").innerHTML = "🛠 Admin Mode";
+  return {
+    id: crypto.randomUUID(),
+    name: name,
+    times: ["","","","",""],
+    avg: null,
+    best: null
+  };
 
-    renderAll(); // IMPORTANT FIX
-
-    showEvent(current); // keeps UI stable
-
-  } else {
-    alert("Wrong password");
-  }
 }
 
-/* INIT */
+function createTeam(){
+
+  return {
+    id: crypto.randomUUID(),
+    name: "Team",
+    times: ["","",""],
+    avg: null,
+    best: null
+  };
+
+}
+
+function parseTime(v){
+
+  if(v === "" || v === null) return null;
+
+  if(String(v).toUpperCase() === "DNF"){
+    return "DNF";
+  }
+
+  return Number(v);
+
+}
+
+function score(v){
+
+  if(v === null || v === "DNF"){
+    return Infinity;
+  }
+
+  return Number(v);
+
+}
+
+/* ======================
+   INIT
+====================== */
+
 function init(){
 
   const names = [
-    "ALBERT","CHONG","DARRYL","ETHAN","GUO","HAN",
-    "KANG","KHONG","KOH","KOO","KYAN"
+    "ALBERT",
+    "CHONG",
+    "DARRYL",
+    "ETHAN",
+    "GUO",
+    "HAN",
+    "KANG",
+    "KHONG",
+    "KOH",
+    "KOO",
+    "KYAN"
   ];
 
   events = {
-    "333":[],
-    "222":[],
-    "teamblind":[],
-    "teamsolve":[],
-    "333finals":[],
-    "222finals":[],
-    "teamblindfinals":[],
-    "teamsolvefinals":[]
+
+    "333": names.map(createCompetitor),
+
+    "222": names.map(createCompetitor),
+
+    "teamblind": Array.from(
+      {length:6},
+      ()=>createTeam()
+    ),
+
+    "teamsolve": Array.from(
+      {length:6},
+      ()=>createTeam()
+    ),
+
+    "333finals": [],
+    "222finals": [],
+    "teamblindfinals": [],
+    "teamsolvefinals": []
+
   };
 
-  names.forEach(n=>{
-    events["333"].push({name:n,times:["","","","",""],avg:null,best:null});
-    events["222"].push({name:n,times:["","","","",""],avg:null,best:null});
-  });
-
-  for(let i=0;i<6;i++){
-    events["teamblind"].push({member1:"",member2:"",times:["","",""],avg:null,best:null});
-    events["teamsolve"].push({member1:"",member2:"",times:["","",""],avg:null,best:null});
-  }
 }
 
-/* SAVE */
+/* ======================
+   FIREBASE SAVE/LOAD
+====================== */
+
 async function save(){
-  await db.collection("competition").doc("main").set(events);
+
+  await db
+    .collection("competition")
+    .doc("main")
+    .set(events);
+
 }
 
-/* LOAD */
 async function load(){
-  const doc = await db.collection("competition").doc("main").get();
 
-  if(doc.exists) events = doc.data();
-  else { init(); await save(); }
+  const doc = await db
+    .collection("competition")
+    .doc("main")
+    .get();
+
+  if(doc.exists){
+
+    events = doc.data();
+
+  }else{
+
+    init();
+    await save();
+
+  }
 
   renderAll();
+
 }
 
-/* LIVE SYNC (FIXED ADMIN BUG HERE) */
-db.collection("competition").doc("main")
+/* ======================
+   ADMIN
+====================== */
+
+function adminLogin(){
+
+  const pass =
+    document.getElementById("adminPass").value;
+
+  if(pass === "cubing123"){
+
+    isAdmin = true;
+
+    document.getElementById("modeBox").innerHTML =
+      "🛠 Admin Mode";
+
+    renderAll();
+
+  }else{
+
+    alert("Wrong password");
+
+  }
+
+}
+
+/* ======================
+   CALCULATIONS
+====================== */
+
+function calc(eventName,id){
+
+  const comp =
+    events[eventName].find(x=>x.id===id);
+
+  if(!comp) return;
+
+  const parsed =
+    comp.times.map(parseTime);
+
+  if(parsed.includes(null)){
+
+    comp.avg = null;
+    comp.best = null;
+    return;
+
+  }
+
+  const nums =
+    parsed.filter(x=>x!=="DNF");
+
+  comp.best =
+    nums.length
+      ? Math.min(...nums)
+      : "DNF";
+
+  const dnfCount =
+    parsed.filter(x=>x==="DNF").length;
+
+  /* TEAM EVENTS */
+
+  if(eventName.includes("team")){
+
+    if(dnfCount >= 1){
+
+      comp.avg = "DNF";
+      return;
+
+    }
+
+    comp.avg = (
+      parsed.reduce((a,b)=>a+b,0)
+      / parsed.length
+    ).toFixed(2);
+
+    return;
+
+  }
+
+  /* NORMAL EVENTS */
+
+  if(dnfCount >= 2){
+
+    comp.avg = "DNF";
+    return;
+
+  }
+
+  if(dnfCount === 1){
+
+    let arr =
+      parsed.filter(x=>x!=="DNF");
+
+    arr.splice(
+      arr.indexOf(Math.min(...arr)),
+      1
+    );
+
+    comp.avg = (
+      arr.reduce((a,b)=>a+b,0)
+      / 3
+    ).toFixed(2);
+
+    return;
+
+  }
+
+  let sorted = [...parsed]
+    .sort((a,b)=>a-b);
+
+  sorted.shift();
+  sorted.pop();
+
+  comp.avg = (
+    sorted.reduce((a,b)=>a+b,0)
+    / 3
+  ).toFixed(2);
+
+}
+
+/* ======================
+   UPDATE SCORE
+====================== */
+
+function updateTime(
+  eventName,
+  id,
+  index,
+  value
+){
+
+  const comp =
+    events[eventName].find(x=>x.id===id);
+
+  if(!comp) return;
+
+  comp.times[index] = value;
+
+  calc(eventName,id);
+
+  save();
+
+  renderAll();
+
+}
+
+/* ======================
+   FINALS
+====================== */
+
+function cloneFinal(c,solves){
+
+  return {
+    id: crypto.randomUUID(),
+    name: c.name,
+    times: Array(solves).fill(""),
+    avg: null,
+    best: null
+  };
+
+}
+
+function gen333Finals(){
+
+  if(!isAdmin){
+    alert("Admin only");
+    return;
+  }
+
+  events["333finals"] =
+    [...events["333"]]
+      .filter(x=>
+        x.avg &&
+        x.avg !== "DNF"
+      )
+      .sort((a,b)=>
+        score(a.avg)-score(b.avg)
+      )
+      .slice(0,8)
+      .map(x=>cloneFinal(x,5));
+
+  save();
+  renderAll();
+
+}
+
+function gen222Finals(){
+
+  if(!isAdmin){
+    alert("Admin only");
+    return;
+  }
+
+  events["222finals"] =
+    [...events["222"]]
+      .filter(x=>
+        x.avg &&
+        x.avg !== "DNF"
+      )
+      .sort((a,b)=>
+        score(a.avg)-score(b.avg)
+      )
+      .slice(0,6)
+      .map(x=>cloneFinal(x,5));
+
+  save();
+  renderAll();
+
+}
+
+function genBlindFinals(){
+
+  if(!isAdmin){
+    alert("Admin only");
+    return;
+  }
+
+  events["teamblindfinals"] =
+    [...events["teamblind"]]
+      .filter(x=>
+        x.best &&
+        x.best !== "DNF"
+      )
+      .sort((a,b)=>
+        score(a.best)-score(b.best)
+      )
+      .slice(0,4)
+      .map(x=>({
+        ...x,
+        id: crypto.randomUUID(),
+        times:["","",""],
+        avg:null,
+        best:null
+      }));
+
+  save();
+  renderAll();
+
+}
+
+function genSolveFinals(){
+
+  if(!isAdmin){
+    alert("Admin only");
+    return;
+  }
+
+  events["teamsolvefinals"] =
+    [...events["teamsolve"]]
+      .filter(x=>
+        x.best &&
+        x.best !== "DNF"
+      )
+      .sort((a,b)=>
+        score(a.best)-score(b.best)
+      )
+      .slice(0,4)
+      .map(x=>({
+        ...x,
+        id: crypto.randomUUID(),
+        times:["","",""],
+        avg:null,
+        best:null
+      }));
+
+  save();
+  renderAll();
+
+}
+
+/* ======================
+   NAVIGATION
+====================== */
+
+function showEvent(name,btn){
+
+  current = name;
+
+  document
+    .querySelectorAll(".eventBtn")
+    .forEach(b=>{
+      b.classList.remove("activeEvent");
+    });
+
+  if(btn){
+    btn.classList.add("activeEvent");
+  }
+
+  renderAll();
+
+}
+
+/* ======================
+   RENDER
+====================== */
+
+function renderAll(){
+
+  document.getElementById("content")
+    .innerHTML = "";
+
+  render(current);
+
+}
+
+function render(eventName){
+
+  const titles = {
+
+    "333":"3x3 Cube - First Round",
+    "222":"2x2 Cube - First Round",
+    "teamblind":"Team Blind",
+    "teamsolve":"Team Solve",
+
+    "333finals":"🏆 3x3 Finals",
+    "222finals":"🏆 2x2 Finals",
+    "teamblindfinals":"🏆 Blind Finals",
+    "teamsolvefinals":"🏆 Solve Finals"
+
+  };
+
+  const data =
+    [...(events[eventName] || [])];
+
+  data.sort((a,b)=>
+    score(a.avg)-score(b.avg)
+  );
+
+  const cols =
+    eventName.includes("team")
+      ? 3
+      : 5;
+
+  let html = `
+
+  <div class="card">
+
+    <div class="cardHeader">
+      ${titles[eventName]}
+    </div>
+
+    <div class="tableWrap">
+
+      <table>
+
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+  `;
+
+  for(let i=0;i<cols;i++){
+
+    html += `
+      <th>Solve ${i+1}</th>
+    `;
+
+  }
+
+  html += `
+      <th>Average</th>
+      <th>Best</th>
+    </tr>
+  `;
+
+  data.forEach((c,index)=>{
+
+    let rowClass = "";
+
+    if(index===0) rowClass="rank1";
+    if(index===1) rowClass="rank2";
+    if(index===2) rowClass="rank3";
+
+    html += `
+      <tr class="${rowClass}">
+    `;
+
+    html += `
+      <td>
+        <strong>#${index+1}</strong>
+      </td>
+    `;
+
+    html += `
+      <td>${c.name || "Unnamed"}</td>
+    `;
+
+    for(let i=0;i<cols;i++){
+
+      html += `
+      <td>
+
+      <input
+        class="scoreInput ${!isAdmin?'readonly':''}"
+        value="${c.times[i] || ''}"
+        ${!isAdmin ? 'readonly' : ''}
+        onchange="
+          updateTime(
+            '${eventName}',
+            '${c.id}',
+            ${i},
+            this.value
+          )
+        "
+      />
+
+      </td>
+      `;
+
+    }
+
+    html += `
+      <td>${c.avg ?? "-"}</td>
+      <td>${c.best ?? "-"}</td>
+    `;
+
+    html += `</tr>`;
+
+  });
+
+  html += `
+      </table>
+
+    </div>
+
+  </div>
+  `;
+
+  document.getElementById("content")
+    .innerHTML = html;
+
+}
+
+/* ======================
+   LIVE FIREBASE SYNC
+====================== */
+
+db.collection("competition")
+.doc("main")
 .onSnapshot(doc=>{
+
   if(doc.exists){
+
     events = doc.data();
 
     renderAll();
 
     if(isAdmin){
-      document.getElementById("modeBox").innerHTML = "🛠 Admin Mode";
+
+      document.getElementById("modeBox")
+        .innerHTML = "🛠 Admin Mode";
+
     }
+
   }
+
 });
 
-/* SHOW */
-function showEvent(e){
-  current = e;
-  renderAll();
-}
+/* ======================
+   START
+====================== */
 
-/* =========================
-   DNF SYSTEM (UNCHANGED BUT RESTORED)
-========================= */
-function calc(e,i){
-
-  let c = events[e][i];
-  let t = c.times;
-
-  if(t.includes("")){
-    c.avg=null;
-    c.best=null;
-    return;
-  }
-
-  let parsed = t.map(x =>
-    String(x).toUpperCase()==="DNF" ? "DNF" : Number(x)
-  );
-
-  let nums = parsed.filter(x=>x!=="DNF");
-
-  c.best = nums.length ? Math.min(...nums) : "DNF";
-
-  let dnf = parsed.filter(x=>x==="DNF").length;
-
-  if(e.includes("team")){
-    c.avg = dnf>=1 ? "DNF" :
-      parsed.reduce((a,b)=>a+b,0)/parsed.length;
-    return;
-  }
-
-  if(dnf>=2){
-    c.avg="DNF";
-    return;
-  }
-
-  if(dnf===1){
-    let arr = parsed.filter(x=>x!=="DNF");
-    let best = Math.min(...arr);
-    arr.splice(arr.indexOf(best),1);
-    c.avg = arr.reduce((a,b)=>a+b,0)/3;
-    return;
-  }
-
-  let sorted=[...parsed].sort((a,b)=>a-b);
-  sorted.shift();
-  sorted.pop();
-
-  c.avg = sorted.reduce((a,b)=>a+b,0)/3;
-}
-
-/* UPDATE */
-async function update(){
-  await save();
-}
-
-/* FINALS */
-function gen333Finals(){
-  if(!isAdmin)return;
-
-  events["333finals"]=events["333"]
-  .filter(x=>x.avg)
-  .sort((a,b)=>a.avg-b.avg)
-  .slice(0,8);
-
-  save(); renderAll();
-}
-
-function gen222Finals(){
-  if(!isAdmin)return;
-
-  events["222finals"]=events["222"]
-  .filter(x=>x.avg)
-  .sort((a,b)=>a.avg-b.avg)
-  .slice(0,6);
-
-  save(); renderAll();
-}
-
-function genBlindFinals(){
-  if(!isAdmin)return;
-
-  events["teamblindfinals"]=events["teamblind"]
-  .filter(x=>x.best)
-  .sort((a,b)=>a.best-b.best)
-  .slice(0,4);
-
-  save(); renderAll();
-}
-
-function genSolveFinals(){
-  if(!isAdmin)return;
-
-  events["teamsolvefinals"]=events["teamsolve"]
-  .filter(x=>x.best)
-  .sort((a,b)=>a.best-b.best)
-  .slice(0,4);
-
-  save(); renderAll();
-}
-
-/* RENDER */
-function renderAll(){
-
-  ["333","222","teamblind","teamsolve",
-   "333finals","222finals","teamblindfinals","teamsolvefinals"]
-  .forEach(render);
-
-  document.querySelectorAll(".section")
-    .forEach(s=>s.classList.add("hidden"));
-
-  let active=document.getElementById(current);
-  if(active) active.classList.remove("hidden");
-}
-
-/* TABLE RENDER */
-function render(e){
-
-  let html=`<div class="section" id="${e}"><table><tr>
-  <th>#</th><th>Name</th>`;
-
-  let cols = e.includes("team") ? 3 : 5;
-
-  for(let i=0;i<cols;i++) html+=`<th>${i+1}</th>`;
-  html+=`<th>Avg</th><th>Best</th></tr>`;
-
-  (events[e]||[]).forEach((c,i)=>{
-
-    html+=`<tr>
-      <td>${i+1}</td>
-      <td>
-        <input value="${c.name||c.member1||''}"
-        ${!isAdmin?'readonly class="readonly"':''}/>
-      </td>`;
-
-    for(let t=0;t<cols;t++){
-      html+=`
-      <td>
-        <input value="${c.times[t]||''}"
-        ${!isAdmin?'readonly class="readonly"':''}
-        onchange="events['${e}'][${i}].times[${t}]=this.value;calc('${e}',${i});update()"/>
-      </td>`;
-    }
-
-    html+=`
-    <td>${c.avg??"-"}</td>
-    <td>${c.best??"-"}</td>
-    </tr>`;
-  });
-
-  html+=`</table></div>`;
-
-  let old=document.getElementById(e);
-  if(old) old.remove();
-
-  document.getElementById("content").innerHTML+=html;
-}
-
-/* START */
-init();
 load();
 
 </script>
 
 </body>
 </html>
+
