@@ -1,357 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Unlock The Cube</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Unlock the Cube: Competition</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<style>
-body{
-  margin:0;
-  font-family:Inter,sans-serif;
-  background:radial-gradient(circle at top,#1e293b,#0b1220);
-  color:white;
-}
-
-.app{display:flex;min-height:100vh}
-
-/* SIDEBAR */
-.sidebar{
-  width:270px;
-  background:#0f172a;
-  border-right:1px solid #1f2a44;
-  padding:20px;
-}
-
-.logo{
-  font-size:26px;
-  font-weight:800;
-  margin-bottom:18px;
-}
-
-.sectionTitle{
-  font-size:11px;
-  opacity:.6;
-  margin:16px 0 8px;
-}
-
-.eventBtn{
-  width:100%;
-  padding:12px;
-  margin-bottom:6px;
-  border-radius:10px;
-  background:#111c33;
-  border:1px solid #1f2a44;
-  color:white;
-  cursor:pointer;
-  text-align:left;
-  transition:.2s;
-}
-
-.eventBtn:hover{background:#1b2b4d}
-.active{background:#3b82f6;border-color:#3b82f6}
-
-/* MAIN */
-.main{flex:1;padding:22px}
-
-.hero{
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  padding:26px;
-  border-radius:18px;
-  margin-bottom:16px;
-}
-
-.hero h1{margin:0;font-size:34px;font-weight:800}
-
-/* CARD */
-.card{
-  background:#0f172a;
-  border:1px solid #1f2a44;
-  border-radius:16px;
-  overflow:hidden;
-}
-
-.cardHeader{
-  padding:16px;
-  font-weight:800;
-  border-bottom:1px solid #1f2a44;
-}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse}
-
-th,td{
-  padding:12px;
-  text-align:center;
-  border-bottom:1px solid #1f2a44;
-}
-
-th{
-  font-size:11px;
-  color:#93c5fd;
-  text-transform:uppercase;
-}
-
-/* INPUTS */
-input{
-  width:90px;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #26324d;
-  background:#0b1220;
-  color:white;
-  text-align:center;
-}
-
-.nameInput{width:140px}
-
-/* PODIUM */
-.gold{background:rgba(250,204,21,.15)}
-.silver{background:rgba(148,163,184,.15)}
-.bronze{background:rgba(251,146,60,.15)}
-.qualify{background:rgba(34,197,94,.08)}
-
-button{
-  cursor:pointer;
-}
-</style>
+  <style>
+    body { margin:0; background:#f3f4f6; font-family:Arial, Helvetica, sans-serif; }
+    .sidebar { width:270px; background:white; border-right:1px solid #ddd; height:100vh; position:fixed; overflow:auto; }
+    .main { margin-left:270px; }
+    .header { background:#1976d2; color:white; padding:14px 30px; font-size:24px; font-weight:bold; }
+    .eventBtn { width:100%; padding:20px 24px; border:none; background:white; text-align:left; font-size:17px; border-bottom:1px solid #eee; cursor:pointer; transition:0.2s; }
+    .eventBtn:hover { background:#f5f5f5; }
+    .activeEvent { background:#e8f0fe; color:#1565c0; font-weight:bold; }
+    .section { padding:35px; }
+    .hidden { display:none; }
+    .title { font-size:34px; font-weight:bold; margin-bottom:25px; }
+    table { width:100%; border-collapse:collapse; background:white; border-radius:14px; overflow:hidden; }
+    th { background:#fafafa; padding:16px; border-bottom:2px solid #ddd; text-align:center; font-size:18px; }
+    td { padding:12px; border-bottom:1px solid #eee; text-align:center; }
+    input { width:90px; padding:8px; border:1px solid #ccc; border-radius:8px; text-align:center; outline:none; }
+    input:focus { border-color:#1976d2; box-shadow:0 0 0 3px rgba(25,118,210,0.15); }
+    .readonly { background:#f2f2f2; pointer-events:none; }
+    .nameInput { width:330px; text-align:left; }
+    .teamInput { width:220px; text-align:left; }
+    .rankBox { width:52px; margin:auto; padding:10px; border-radius:8px; background:#ececec; font-weight:bold; }
+    .green { background:#00e676; }
+    .gold { background:#ffd600; }
+    .modeBox { position:fixed; top:10px; right:10px; background:white; padding:10px 14px; border-radius:10px; font-weight:bold; box-shadow:0 2px 10px rgba(0,0,0,0.2); z-index:999; }
+  </style>
 </head>
-
 <body>
+  <div class="modeBox" id="modeBox">👀 Viewer Mode</div>
 
-<div class="app">
+  <div class="sidebar">
+    <div class="p-6 text-3xl font-bold border-b">🧩 Events</div>
+    <button class="eventBtn activeEvent" onclick="showEvent('333')">🟦 3x3x3 Cube</button>
+    <button class="eventBtn" onclick="showEvent('222')">🟨 2x2x2 Cube</button>
+    <button class="eventBtn" onclick="showEvent('teamblind')">👁️ 3x3 Team Blind</button>
+    <button class="eventBtn" onclick="showEvent('teamsolve')">🤝 3x3 Team Solve</button>
+    <button class="eventBtn" onclick="generateFinals('333')">🏆 3x3 Finals</button>
+    <button class="eventBtn" onclick="generateFinals('222')">🏆 2x2 Finals</button>
+    <button class="eventBtn" onclick="generateFinals('teamblind')">🏆 Team Blind Finals</button>
+    <button class="eventBtn" onclick="generateFinals('teamsolve')">🏆 Team Solve Finals</button>
+    <button class="eventBtn" onclick="toggleAdmin()">🔒 Toggle Admin</button>
+  </div>
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-<div class="logo">🧩 Unlock</div>
+  <div class="main">
+    <div class="header">Unlock the Cube: Competition</div>
+    <div id="content"></div>
+  </div>
 
-<div class="sectionTitle">Events</div>
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "unlock-the-cube-9abea.firebaseapp.com",
+      projectId: "unlock-the-cube-9abea",
+      storageBucket: "unlock-the-cube-9abea.appspot.com",
+      messagingSenderId: "4778254984",
+      appId: "1:4778254984:web:728b7915b36ff9390e753d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-<button class="eventBtn active" onclick="switchEvent('333',this)">3x3</button>
-<button class="eventBtn" onclick="switchEvent('222',this)">2x2</button>
-<button class="eventBtn" onclick="switchEvent('teamblind',this)">Team Blind</button>
-<button class="eventBtn" onclick="switchEvent('teamsolve',this)">Team Solve</button>
+    // Admin state
+    let isAdmin = localStorage.getItem("isAdmin") === "true";
+    updateModeBox();
 
-<div class="sectionTitle">Finals</div>
-
-<button class="eventBtn" onclick="switchEvent('333finals',this)">3x3 Finals</button>
-<button class="eventBtn" onclick="switchEvent('222finals',this)">2x2 Finals</button>
-<button class="eventBtn" onclick="switchEvent('teamblindfinals',this)">Blind Finals</button>
-<button class="eventBtn" onclick="switchEvent('teamsolvefinals',this)">Solve Finals</button>
-
-</div>
-
-<!-- MAIN -->
-<div class="main">
-
-<div class="hero">
-<h1>Unlock The Cube</h1>
-<p>Live competition dashboard</p>
-</div>
-
-<div class="card">
-<div class="cardHeader" id="title">Event</div>
-<div id="content"></div>
-</div>
-
-</div>
-</div>
-
-<script>
-
-/* FIREBASE */
-const firebaseConfig = {
-  apiKey: "AIzaSyCKnH1kAR0z_3LtsHXNCBKQmF_VJLGl9ls",
-  authDomain: "unlock-the-cube-9abea.firebaseapp.com",
-  projectId: "unlock-the-cube-9abea"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/* STATE */
-let events = {};
-let current = "333";
-
-/* INIT */
-function make(name=""){
-  return {
-    id: crypto.randomUUID(),
-    name,
-    times:["","","","",""],
-    avg:null,
-    best:null
-  };
-}
-
-function init(){
-  const names=["ALBERT","CHONG","DARRYL","ETHAN","GUO","HAN","KANG","KHONG"];
-
-  events={
-    "333":names.map(make),
-    "222":names.map(make),
-    "teamblind":[make(),make(),make(),make()],
-    "teamsolve":[make(),make(),make(),make()],
-    "333finals":[],
-    "222finals":[],
-    "teamblindfinals":[],
-    "teamsolvefinals":[]
-  };
-}
-
-/* FLOAT SAFE PARSE */
-function parse(v){
-  if(v==="") return null;
-  if(String(v).toUpperCase()==="DNF") return "DNF";
-  const n=parseFloat(v);
-  return isNaN(n)?null:n;
-}
-
-function val(v){
-  const n=parseFloat(v);
-  return isNaN(n)?Infinity:n;
-}
-
-/* CALC */
-function calc(c,event){
-
-  const p=c.times.map(parse);
-  if(p.includes(null)){c.avg=null;c.best=null;return;}
-
-  const nums=p.filter(x=>x!=="DNF");
-  c.best=nums.length?Math.min(...nums):"DNF";
-
-  const dnf=p.filter(x=>x==="DNF").length;
-
-  if(event.includes("team")){
-    if(dnf>0){c.avg="DNF";return;}
-    c.avg=(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2);
-    return;
-  }
-
-  if(dnf>=2){c.avg="DNF";return;}
-
-  let arr=[...nums].sort((a,b)=>a-b);
-
-  if(dnf===1) arr.splice(arr.indexOf(Math.min(...arr)),1);
-  else{arr.shift();arr.pop();}
-
-  c.avg=(arr.reduce((a,b)=>a+b,0)/3).toFixed(2);
-}
-
-/* FIREBASE SAVE */
-async function save(){
-  await db.collection("competition").doc("main").set(events);
-}
-
-/* LOAD + SYNC */
-async function start(){
-  const doc=await db.collection("competition").doc("main").get();
-
-  if(doc.exists) events=doc.data();
-  else{init();await save();}
-
-  render();
-
-  db.collection("competition").doc("main")
-  .onSnapshot(d=>{
-    if(d.exists){
-      events=d.data();
-      render();
-    }
-  });
-}
-
-/* UPDATE */
-function updateTime(e,id,i,v){
-  const c=events[e].find(x=>x.id===id);
-  c.times[i]=v;
-  calc(c,e);
-  save();
-  render();
-}
-
-function updateName(e,id,v){
-  const c=events[e].find(x=>x.id===id);
-  c.name=v;
-  save();
-}
-
-/* SWITCH */
-function switchEvent(e,btn){
-  current=e;
-  document.querySelectorAll(".eventBtn").forEach(b=>b.classList.remove("active"));
-  if(btn) btn.classList.add("active");
-  render();
-}
-
-/* RENDER */
-function render(){
-
-  const data=[...events[current]];
-  const isTeam=current.includes("team");
-
-  data.sort((a,b)=>
-    val(isTeam?a.best:a.avg)-val(isTeam?b.best:b.avg)
-  );
-
-  document.getElementById("title").innerText=current.toUpperCase();
-
-  const solves=isTeam?3:5;
-
-  let html="<table><tr><th>#</th><th>Name</th>";
-
-  for(let i=0;i<solves;i++) html+=`<th>${i+1}</th>`;
-  html+="<th>Avg</th><th>Best</th></tr>";
-
-  data.forEach((c,i)=>{
-
-    let cls="";
-    if(current==="333"&&i<8)cls="qualify";
-    if(current==="222"&&i<6)cls="qualify";
-
-    if(current.includes("finals")){
-      if(i===0)cls="gold";
-      if(i===1)cls="silver";
-      if(i===2)cls="bronze";
+    function toggleAdmin(){
+      isAdmin = !isAdmin;
+      localStorage.setItem("isAdmin", isAdmin ? "true" : "false");
+      updateModeBox();
+      renderAll();
     }
 
-    html+=`<tr class="${cls}">
-    <td>${i+1}</td>
-
-    <td><input class="nameInput"
-      value="${c.name}"
-      onchange="updateName('${current}','${c.id}',this.value)">
-    </td>`;
-
-    for(let s=0;s<solves;s++){
-      html+=`
-      <td>
-      <input inputmode="decimal"
-        value="${c.times[s]||''}"
-        onchange="updateTime('${current}','${c.id}',${s},this.value)">
-      </td>`;
+    function updateModeBox(){
+      document.getElementById("modeBox").innerHTML = isAdmin ? "🛠 Admin Mode" : "👀 Viewer Mode";
     }
 
-    html+=`
-    <td>${c.avg??"-"}</td>
-    <td>${c.best??"-"}</td>
-    </tr>`;
-  });
+    // Events data
+    let events = {
+      "333": [], "222": [], "teamblind": [], "teamsolve": [],
+      "333finals": [], "222finals": [], "teamblindfinals": [], "teamsolvefinals": []
+    };
 
-  html+="</table>";
-  document.getElementById("content").innerHTML=html;
-}
+    // Create section
+    function createSection(event,title,solves,team=false){
+      let solveHeaders = Array.from({length:solves},(_,i)=>`<th>${i+1}</th>`).join("");
+      let names = team ? `<th>Member 1</th><th>Member 2</th>` : `<th>Name</th>`;
+      return `
+        <div class="section hidden" id="section${event}">
+          <div class="title">${title}</div>
+          <table>
+            <thead>
+              <tr><th>#</th>${names}${solveHeaders}<th>Average</th><th>Best</th></tr>
+            </thead>
+            <tbody id="table${event}"></tbody>
+          </table>
+        </div>`;
+    }
 
-start();
+    // Render
+    function render(event){
+      const tbody = document.getElementById("table"+event);
+      tbody.innerHTML="";
+      let ranked = [...events[event]] || [];
+      ranked.forEach((c,index)=>{
+        let tr=document.createElement("tr");
+        let team=event.includes("team");
+        let solves=team?3:5;
+        let nameHTML=team
+          ? `<td><input class="teamInput ${!isAdmin?'readonly':''}" value="${c.member1||''}" onchange="updateName('${event}',${index},'member1',this.value)"></td>
+             <td><input class="teamInput ${!isAdmin?'readonly':''}" value="${c.member2||''}" onchange="updateName('${event}',${index},'member2',this.value)"></td>`
+          : `<td><input class="nameInput ${!isAdmin?'readonly':''}" value="${c.name||''}" onchange="updateName('${event}',${index},'name',this.value)"></td>`;
+        let solveHTML="";
+        for(let i=0;i<solves;i++){
+          solveHTML+=`<td><input class="${!isAdmin?'readonly':''}" value="${c.times[i]||''}" onchange="updateTime('${event}',${index},${i},this.value)"></td>`;
+        }
+        tr.innerHTML=`<td><div class="rankBox">${index+1}</div></td>${nameHTML}${solveHTML}<td>${c.avg||'-'}</td><td>${c.best||'-'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
 
-</script>
+    function renderAll(){
+      ["333","222","teamblind","teamsolve","333finals","222finals","teamblindfinals","teamsolvefinals"].forEach(render);
+      showEvent("333");
+    }
 
-</body>
-</html>
+    // Show event
+    function showEvent(event){
+      document.querySelectorAll(".section").forEach(sec=>sec.classList.add("hidden"));
+      document.getElementById("section"+event).classList.remove("hidden");
+      document.querySelectorAll(".eventBtn").forEach(btn=>btn.classList.remove("activeEvent"));
+    }
+
+    // Update functions
+    async function updateTime(event,index,solve,value){
+      if(!isAdmin) return;
+      events[event][index].times[solve]=value
