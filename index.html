@@ -217,7 +217,7 @@ tr:hover{
 ========================= */
 
 .scoreInput{
-  width:80px;
+  width:85px;
   text-align:center;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.08);
@@ -225,6 +225,10 @@ tr:hover{
   padding:10px;
   color:white;
   outline:none;
+}
+
+.nameInput{
+  width:170px;
 }
 
 .scoreInput:focus{
@@ -301,11 +305,11 @@ button:hover{
 </button>
 
 <button class="eventBtn" onclick="showEvent('teamblind',this)">
-Team Blind
+3x3 Team Blind
 </button>
 
 <button class="eventBtn" onclick="showEvent('teamsolve',this)">
-Team Solve
+3x3 Team Solve
 </button>
 
 <div class="sideTitle">Generate Finals</div>
@@ -337,11 +341,11 @@ Team Solve
 </button>
 
 <button class="eventBtn" onclick="showEvent('teamblindfinals',this)">
-🏆 Blind Finals
+🏆 Team Blind Finals
 </button>
 
 <button class="eventBtn" onclick="showEvent('teamsolvefinals',this)">
-🏆 Solve Finals
+🏆 Team Solve Finals
 </button>
 
 </div>
@@ -429,11 +433,11 @@ function createCompetitor(name){
 
 }
 
-function createTeam(name){
+function createTeam(){
 
   return {
     id: crypto.randomUUID(),
-    name: name,
+    name: "",
     times: ["","",""],
     avg: null,
     best: null
@@ -492,21 +496,21 @@ function init(){
     "222": names.map(createCompetitor),
 
     "teamblind":[
-      createTeam("TEAM A"),
-      createTeam("TEAM B"),
-      createTeam("TEAM C"),
-      createTeam("TEAM D"),
-      createTeam("TEAM E"),
-      createTeam("TEAM F")
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam()
     ],
 
     "teamsolve":[
-      createTeam("TEAM A"),
-      createTeam("TEAM B"),
-      createTeam("TEAM C"),
-      createTeam("TEAM D"),
-      createTeam("TEAM E"),
-      createTeam("TEAM F")
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam(),
+      createTeam()
     ],
 
     "333finals": [],
@@ -700,6 +704,27 @@ function updateTime(
 }
 
 /* =========================
+   UPDATE NAME
+========================= */
+
+function updateName(
+  eventName,
+  id,
+  value
+){
+
+  const comp =
+    events[eventName].find(x=>x.id===id);
+
+  if(!comp) return;
+
+  comp.name = value;
+
+  save();
+
+}
+
+/* =========================
    FINALS
 ========================= */
 
@@ -780,13 +805,7 @@ function genBlindFinals(){
         score(a.best)-score(b.best)
       )
       .slice(0,4)
-      .map(x=>({
-        ...x,
-        id: crypto.randomUUID(),
-        times:["","",""],
-        avg:null,
-        best:null
-      }));
+      .map(x=>cloneFinal(x,3));
 
   save();
   renderAll();
@@ -810,13 +829,7 @@ function genSolveFinals(){
         score(a.best)-score(b.best)
       )
       .slice(0,4)
-      .map(x=>({
-        ...x,
-        id: crypto.randomUUID(),
-        times:["","",""],
-        avg:null,
-        best:null
-      }));
+      .map(x=>cloneFinal(x,3));
 
   save();
   renderAll();
@@ -922,9 +935,7 @@ function render(eventName){
 
     let rowClass = "";
 
-    /* =========================
-       QUALIFICATION HIGHLIGHTS
-    ========================= */
+    /* QUALIFICATION */
 
     if(eventName === "333" && index < 8){
       rowClass = "qualified";
@@ -942,9 +953,7 @@ function render(eventName){
       rowClass = "qualified";
     }
 
-    /* =========================
-       FINALS PODIUMS
-    ========================= */
+    /* FINALS */
 
     if(
       eventName === "333finals" ||
@@ -979,7 +988,23 @@ function render(eventName){
     `;
 
     html += `
-      <td>${c.name || "Unnamed"}</td>
+      <td>
+
+      <input
+        class="scoreInput nameInput ${!isAdmin?'readonly':''}"
+        value="${c.name || ''}"
+        placeholder="Team / Competitor"
+        ${!isAdmin ? 'readonly' : ''}
+        onchange="
+          updateName(
+            '${eventName}',
+            '${c.id}',
+            this.value
+          )
+        "
+      />
+
+      </td>
     `;
 
     for(let i=0;i<cols;i++){
