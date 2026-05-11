@@ -3,361 +3,169 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
 <title>Unlock The Cube</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-  box-sizing:border-box;
-}
-
 body{
   margin:0;
-  font-family:'Inter',sans-serif;
-  background:
-  radial-gradient(circle at top left,#2563eb33 0%,transparent 30%),
-  radial-gradient(circle at bottom right,#7c3aed33 0%,transparent 30%),
-  #0f172a;
+  font-family:Inter,sans-serif;
+  background:radial-gradient(circle at top,#1e293b,#0b1220);
   color:white;
-  min-height:100vh;
 }
 
-/* ========================= */
+.app{display:flex;min-height:100vh}
 
-.app{
-  display:flex;
-  min-height:100vh;
-}
-
-/* =========================
-   SIDEBAR
-========================= */
-
+/* SIDEBAR */
 .sidebar{
   width:270px;
-  background:rgba(255,255,255,.05);
-  border-right:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(18px);
-  padding:22px;
+  background:#0f172a;
+  border-right:1px solid #1f2a44;
+  padding:20px;
 }
 
 .logo{
-  font-size:30px;
+  font-size:26px;
   font-weight:800;
-  margin-bottom:30px;
+  margin-bottom:18px;
 }
 
 .sectionTitle{
-  font-size:12px;
-  opacity:.5;
-  margin:20px 0 10px;
-  text-transform:uppercase;
-  letter-spacing:1px;
+  font-size:11px;
+  opacity:.6;
+  margin:16px 0 8px;
 }
 
 .eventBtn{
   width:100%;
-  padding:14px 16px;
-  margin-bottom:8px;
-  border:none;
-  border-radius:14px;
+  padding:12px;
+  margin-bottom:6px;
+  border-radius:10px;
+  background:#111c33;
+  border:1px solid #1f2a44;
+  color:white;
   cursor:pointer;
   text-align:left;
-  background:transparent;
-  color:white;
-  font-weight:700;
   transition:.2s;
 }
 
-.eventBtn:hover{
-  background:rgba(255,255,255,.08);
-  transform:translateX(4px);
-}
+.eventBtn:hover{background:#1b2b4d}
+.active{background:#3b82f6;border-color:#3b82f6}
 
-.active{
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-}
-
-/* =========================
-   MAIN
-========================= */
-
-.main{
-  flex:1;
-  padding:28px;
-}
-
-.top{
-  display:flex;
-  gap:20px;
-  margin-bottom:24px;
-}
+/* MAIN */
+.main{flex:1;padding:22px}
 
 .hero{
-  flex:1;
   background:linear-gradient(135deg,#2563eb,#7c3aed);
-  border-radius:28px;
-  padding:32px;
-  box-shadow:0 20px 40px rgba(0,0,0,.3);
+  padding:26px;
+  border-radius:18px;
+  margin-bottom:16px;
 }
 
-.hero h1{
-  margin:0;
-  font-size:42px;
-  font-weight:800;
-}
+.hero h1{margin:0;font-size:34px;font-weight:800}
 
-.hero p{
-  margin-top:10px;
-  opacity:.9;
-}
-
-.admin{
-  width:320px;
-}
-
-.mode{
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:20px;
-  padding:18px;
-  margin-bottom:14px;
-  font-weight:700;
-}
-
-.login{
-  display:flex;
-  gap:10px;
-}
-
-/* =========================
-   TABLE CARD
-========================= */
-
+/* CARD */
 .card{
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:28px;
+  background:#0f172a;
+  border:1px solid #1f2a44;
+  border-radius:16px;
   overflow:hidden;
-  backdrop-filter:blur(18px);
-  box-shadow:0 20px 40px rgba(0,0,0,.25);
 }
 
 .cardHeader{
-  padding:24px 28px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-  font-size:24px;
+  padding:16px;
   font-weight:800;
+  border-bottom:1px solid #1f2a44;
 }
 
-.tableWrap{
-  overflow-x:auto;
-}
+/* TABLE */
+table{width:100%;border-collapse:collapse}
 
-/* =========================
-   TABLE
-========================= */
-
-table{
-  width:100%;
-  border-collapse:collapse;
+th,td{
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #1f2a44;
 }
 
 th{
-  background:rgba(255,255,255,.04);
+  font-size:11px;
   color:#93c5fd;
   text-transform:uppercase;
-  font-size:12px;
-  letter-spacing:1px;
 }
 
-th,td{
-  padding:16px;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-tr:hover{
-  background:rgba(255,255,255,.03);
-}
-
-/* =========================
-   INPUTS
-========================= */
-
+/* INPUTS */
 input{
-  width:85px;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,.08);
-  background:rgba(255,255,255,.08);
+  width:90px;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #26324d;
+  background:#0b1220;
   color:white;
   text-align:center;
-  outline:none;
 }
 
-input:focus{
-  border-color:#60a5fa;
-}
+.nameInput{width:140px}
 
-.nameInput{
-  width:180px;
-}
-
-.readonly{
-  opacity:.65;
-  pointer-events:none;
-}
-
-/* =========================
-   QUALIFY / PODIUM
-========================= */
-
-.qualify{
-  background:rgba(34,197,94,.16);
-}
-
-.gold{
-  background:rgba(250,204,21,.25);
-}
-
-.silver{
-  background:rgba(209,213,219,.18);
-}
-
-.bronze{
-  background:rgba(251,146,60,.18);
-}
-
-/* ========================= */
+/* PODIUM */
+.gold{background:rgba(250,204,21,.15)}
+.silver{background:rgba(148,163,184,.15)}
+.bronze{background:rgba(251,146,60,.15)}
+.qualify{background:rgba(34,197,94,.08)}
 
 button{
-  border:none;
-  border-radius:12px;
-  padding:12px 16px;
-  font-weight:700;
   cursor:pointer;
-  background:linear-gradient(135deg,#2563eb,#7c3aed);
-  color:white;
 }
-
-button:hover{
-  opacity:.92;
-}
-
-/* ========================= */
-
-@media(max-width:950px){
-
-  .app{
-    flex-direction:column;
-  }
-
-  .sidebar{
-    width:100%;
-  }
-
-  .top{
-    flex-direction:column;
-  }
-
-  .admin{
-    width:100%;
-  }
-
-}
-
 </style>
 </head>
+
 <body>
 
 <div class="app">
 
 <!-- SIDEBAR -->
-
 <div class="sidebar">
-
-<div class="logo">
-🧩 Unlock The Cube
-</div>
+<div class="logo">🧩 Unlock</div>
 
 <div class="sectionTitle">Events</div>
 
 <button class="eventBtn active" onclick="switchEvent('333',this)">3x3</button>
 <button class="eventBtn" onclick="switchEvent('222',this)">2x2</button>
-<button class="eventBtn" onclick="switchEvent('teamblind',this)">3x3 Team Blind</button>
-<button class="eventBtn" onclick="switchEvent('teamsolve',this)">3x3 Team Solve</button>
-
-<div class="sectionTitle">Generate Finals</div>
-
-<button class="eventBtn" onclick="generate333Finals()">🏆 Generate 3x3 Finals</button>
-<button class="eventBtn" onclick="generate222Finals()">🏆 Generate 2x2 Finals</button>
-<button class="eventBtn" onclick="generateBlindFinals()">🏆 Generate Blind Finals</button>
-<button class="eventBtn" onclick="generateSolveFinals()">🏆 Generate Solve Finals</button>
+<button class="eventBtn" onclick="switchEvent('teamblind',this)">Team Blind</button>
+<button class="eventBtn" onclick="switchEvent('teamsolve',this)">Team Solve</button>
 
 <div class="sectionTitle">Finals</div>
 
-<button class="eventBtn" onclick="switchEvent('333finals',this)">🏆 3x3 Finals</button>
-<button class="eventBtn" onclick="switchEvent('222finals',this)">🏆 2x2 Finals</button>
-<button class="eventBtn" onclick="switchEvent('teamblindfinals',this)">🏆 Blind Finals</button>
-<button class="eventBtn" onclick="switchEvent('teamsolvefinals',this)">🏆 Solve Finals</button>
+<button class="eventBtn" onclick="switchEvent('333finals',this)">3x3 Finals</button>
+<button class="eventBtn" onclick="switchEvent('222finals',this)">2x2 Finals</button>
+<button class="eventBtn" onclick="switchEvent('teamblindfinals',this)">Blind Finals</button>
+<button class="eventBtn" onclick="switchEvent('teamsolvefinals',this)">Solve Finals</button>
 
 </div>
 
 <!-- MAIN -->
-
 <div class="main">
-
-<div class="top">
 
 <div class="hero">
 <h1>Unlock The Cube</h1>
-<p>Professional Cubing Competition Dashboard</p>
+<p>Live competition dashboard</p>
 </div>
 
-<div class="admin">
-
-<div class="mode" id="modeText">
-👀 Viewer Mode
-</div>
-
-<div class="login">
-
-<input
-type="password"
-id="adminPass"
-placeholder="Password"
-/>
-
-<button onclick="login()">
-Login
-</button>
-
-</div>
-
-</div>
-
-</div>
-
+<div class="card">
+<div class="cardHeader" id="title">Event</div>
 <div id="content"></div>
-
 </div>
 
+</div>
 </div>
 
 <script>
 
 /* FIREBASE */
-
 const firebaseConfig = {
   apiKey: "AIzaSyCKnH1kAR0z_3LtsHXNCBKQmF_VJLGl9ls",
   authDomain: "unlock-the-cube-9abea.firebaseapp.com",
@@ -365,19 +173,14 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const db = firebase.firestore();
 
 /* STATE */
-
-let current = "333";
-let isAdmin = false;
 let events = {};
+let current = "333";
 
-/* HELPERS */
-
-function makePlayer(name){
-
+/* INIT */
+function make(name=""){
   return {
     id: crypto.randomUUID(),
     name,
@@ -385,492 +188,168 @@ function makePlayer(name){
     avg:null,
     best:null
   };
-
 }
-
-function makeTeam(name=""){
-
-  return {
-    id: crypto.randomUUID(),
-    name,
-    times:["","",""],
-    avg:null,
-    best:null
-  };
-
-}
-
-function parse(v){
-
-  if(v === "") return null;
-
-  if(String(v).toUpperCase() === "DNF"){
-    return "DNF";
-  }
-
-  return Number(v);
-
-}
-
-function value(v){
-
-  if(v === null || v === "DNF"){
-    return Infinity;
-  }
-
-  return Number(v);
-
-}
-
-/* INIT */
 
 function init(){
+  const names=["ALBERT","CHONG","DARRYL","ETHAN","GUO","HAN","KANG","KHONG"];
 
-  const names = [
-    "ALBERT","CHONG","DARRYL","ETHAN",
-    "GUO","HAN","KANG","KHONG",
-    "KOH","KOO","KYAN"
-  ];
-
-  events = {
-
-    "333": names.map(makePlayer),
-    "222": names.map(makePlayer),
-
-    "teamblind":[
-      makeTeam(),makeTeam(),makeTeam(),
-      makeTeam(),makeTeam(),makeTeam()
-    ],
-
-    "teamsolve":[
-      makeTeam(),makeTeam(),makeTeam(),
-      makeTeam(),makeTeam(),makeTeam()
-    ],
-
+  events={
+    "333":names.map(make),
+    "222":names.map(make),
+    "teamblind":[make(),make(),make(),make()],
+    "teamsolve":[make(),make(),make(),make()],
     "333finals":[],
     "222finals":[],
     "teamblindfinals":[],
     "teamsolvefinals":[]
-
   };
-
 }
 
-/* SAVE */
-
-async function save(){
-
-  await db
-  .collection("competition")
-  .doc("main")
-  .set(events);
-
+/* FLOAT SAFE PARSE */
+function parse(v){
+  if(v==="") return null;
+  if(String(v).toUpperCase()==="DNF") return "DNF";
+  const n=parseFloat(v);
+  return isNaN(n)?null:n;
 }
 
-/* LOAD */
+function val(v){
+  const n=parseFloat(v);
+  return isNaN(n)?Infinity:n;
+}
 
-async function load(){
+/* CALC */
+function calc(c,event){
 
-  const doc =
-    await db
-    .collection("competition")
-    .doc("main")
-    .get();
+  const p=c.times.map(parse);
+  if(p.includes(null)){c.avg=null;c.best=null;return;}
 
-  if(doc.exists){
+  const nums=p.filter(x=>x!=="DNF");
+  c.best=nums.length?Math.min(...nums):"DNF";
 
-    events = doc.data();
+  const dnf=p.filter(x=>x==="DNF").length;
 
-  }else{
-
-    init();
-    await save();
-
+  if(event.includes("team")){
+    if(dnf>0){c.avg="DNF";return;}
+    c.avg=(nums.reduce((a,b)=>a+b,0)/nums.length).toFixed(2);
+    return;
   }
+
+  if(dnf>=2){c.avg="DNF";return;}
+
+  let arr=[...nums].sort((a,b)=>a-b);
+
+  if(dnf===1) arr.splice(arr.indexOf(Math.min(...arr)),1);
+  else{arr.shift();arr.pop();}
+
+  c.avg=(arr.reduce((a,b)=>a+b,0)/3).toFixed(2);
+}
+
+/* FIREBASE SAVE */
+async function save(){
+  await db.collection("competition").doc("main").set(events);
+}
+
+/* LOAD + SYNC */
+async function start(){
+  const doc=await db.collection("competition").doc("main").get();
+
+  if(doc.exists) events=doc.data();
+  else{init();await save();}
 
   render();
 
-}
-
-/* LIVE */
-
-db.collection("competition")
-.doc("main")
-.onSnapshot(doc=>{
-
-  if(doc.exists){
-
-    events = doc.data();
-
-    render();
-
-  }
-
-});
-
-/* LOGIN */
-
-function login(){
-
-  if(
-    document.getElementById("adminPass").value
-    === "cubing123"
-  ){
-
-    isAdmin = true;
-
-    document.getElementById("modeText")
-    .innerHTML = "🛠 Admin Mode";
-
-    render();
-
-  }
-
-}
-
-/* CALCULATE */
-
-function calculate(comp,event){
-
-  const parsed =
-    comp.times.map(parse);
-
-  if(parsed.includes(null)){
-
-    comp.avg = null;
-    comp.best = null;
-    return;
-
-  }
-
-  const nums =
-    parsed.filter(x=>x!=="DNF");
-
-  comp.best =
-    nums.length
-    ? Math.min(...nums)
-    : "DNF";
-
-  const dnf =
-    parsed.filter(x=>x==="DNF").length;
-
-  /* TEAM EVENTS */
-
-  if(event.includes("team")){
-
-    if(dnf){
-
-      comp.avg = "DNF";
-      return;
-
+  db.collection("competition").doc("main")
+  .onSnapshot(d=>{
+    if(d.exists){
+      events=d.data();
+      render();
     }
-
-    comp.avg =
-      (
-        parsed.reduce((a,b)=>a+b,0)
-        / parsed.length
-      ).toFixed(2);
-
-    return;
-
-  }
-
-  /* NORMAL EVENTS */
-
-  if(dnf >= 2){
-
-    comp.avg = "DNF";
-    return;
-
-  }
-
-  if(dnf === 1){
-
-    let arr =
-      parsed.filter(x=>x!=="DNF");
-
-    arr.splice(
-      arr.indexOf(Math.min(...arr)),
-      1
-    );
-
-    comp.avg =
-      (
-        arr.reduce((a,b)=>a+b,0)
-        / 3
-      ).toFixed(2);
-
-    return;
-
-  }
-
-  let arr =
-    [...parsed].sort((a,b)=>a-b);
-
-  arr.shift();
-  arr.pop();
-
-  comp.avg =
-    (
-      arr.reduce((a,b)=>a+b,0)
-      / 3
-    ).toFixed(2);
-
+  });
 }
 
 /* UPDATE */
-
-function updateName(event,id,val){
-
-  const comp =
-    events[event]
-    .find(x=>x.id===id);
-
-  comp.name = val;
-
+function updateTime(e,id,i,v){
+  const c=events[e].find(x=>x.id===id);
+  c.times[i]=v;
+  calc(c,e);
   save();
-
-}
-
-function updateSolve(event,id,index,val){
-
-  const comp =
-    events[event]
-    .find(x=>x.id===id);
-
-  comp.times[index] = val;
-
-  calculate(comp,event);
-
-  save();
-
-}
-
-/* FINALS */
-
-function generate333Finals(){
-
-  events["333finals"] =
-    [...events["333"]]
-    .filter(x=>x.avg && x.avg!=="DNF")
-    .sort((a,b)=>value(a.avg)-value(b.avg))
-    .slice(0,8)
-    .map(x=>makePlayer(x.name));
-
-  save();
-
-}
-
-function generate222Finals(){
-
-  events["222finals"] =
-    [...events["222"]]
-    .filter(x=>x.avg && x.avg!=="DNF")
-    .sort((a,b)=>value(a.avg)-value(b.avg))
-    .slice(0,6)
-    .map(x=>makePlayer(x.name));
-
-  save();
-
-}
-
-function generateBlindFinals(){
-
-  events["teamblindfinals"] =
-    [...events["teamblind"]]
-    .filter(x=>x.best && x.best!=="DNF")
-    .sort((a,b)=>value(a.best)-value(b.best))
-    .slice(0,4)
-    .map(x=>makeTeam(x.name));
-
-  save();
-
-}
-
-function generateSolveFinals(){
-
-  events["teamsolvefinals"] =
-    [...events["teamsolve"]]
-    .filter(x=>x.best && x.best!=="DNF")
-    .sort((a,b)=>value(a.best)-value(b.best))
-    .slice(0,4)
-    .map(x=>makeTeam(x.name));
-
-  save();
-
-}
-
-/* NAV */
-
-function switchEvent(name,btn){
-
-  current = name;
-
-  document
-  .querySelectorAll(".eventBtn")
-  .forEach(x=>x.classList.remove("active"));
-
-  if(btn){
-    btn.classList.add("active");
-  }
-
   render();
+}
 
+function updateName(e,id,v){
+  const c=events[e].find(x=>x.id===id);
+  c.name=v;
+  save();
+}
+
+/* SWITCH */
+function switchEvent(e,btn){
+  current=e;
+  document.querySelectorAll(".eventBtn").forEach(b=>b.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+  render();
 }
 
 /* RENDER */
-
 function render(){
 
-  const data =
-    [...events[current]];
+  const data=[...events[current]];
+  const isTeam=current.includes("team");
 
-  const isTeam =
-    current.includes("team");
+  data.sort((a,b)=>
+    val(isTeam?a.best:a.avg)-val(isTeam?b.best:b.avg)
+  );
 
-  if(isTeam){
+  document.getElementById("title").innerText=current.toUpperCase();
 
-    data.sort((a,b)=>
-      value(a.best)-value(b.best)
-    );
+  const solves=isTeam?3:5;
 
-  }else{
+  let html="<table><tr><th>#</th><th>Name</th>";
 
-    data.sort((a,b)=>
-      value(a.avg)-value(b.avg)
-    );
-
-  }
-
-  const solves =
-    isTeam ? 3 : 5;
-
-  let html = `
-
-  <div class="card">
-
-  <div class="cardHeader">
-  ${current.toUpperCase()}
-  </div>
-
-  <div class="tableWrap">
-
-  <table>
-
-  <tr>
-  <th>Rank</th>
-  <th>Name</th>
-  `;
-
-  for(let i=0;i<solves;i++){
-
-    html += `<th>${i+1}</th>`;
-
-  }
-
-  html += `
-  <th>Average</th>
-  <th>Best</th>
-  </tr>
-  `;
+  for(let i=0;i<solves;i++) html+=`<th>${i+1}</th>`;
+  html+="<th>Avg</th><th>Best</th></tr>";
 
   data.forEach((c,i)=>{
 
-    let cls = "";
+    let cls="";
+    if(current==="333"&&i<8)cls="qualify";
+    if(current==="222"&&i<6)cls="qualify";
 
-    /* QUALIFIERS */
-
-    if(current==="333" && i<8) cls="qualify";
-    if(current==="222" && i<6) cls="qualify";
-    if(current==="teamblind" && i<4) cls="qualify";
-    if(current==="teamsolve" && i<4) cls="qualify";
-
-    /* PODIUM */
-
-    if(current==="333finals" || current==="222finals"){
-
-      if(i===0) cls="gold";
-      if(i===1) cls="silver";
-      if(i===2) cls="bronze";
-
+    if(current.includes("finals")){
+      if(i===0)cls="gold";
+      if(i===1)cls="silver";
+      if(i===2)cls="bronze";
     }
 
-    if(current==="teamblindfinals" || current==="teamsolvefinals"){
+    html+=`<tr class="${cls}">
+    <td>${i+1}</td>
 
-      if(i===0) cls="gold";
-
-    }
-
-    html += `
-    <tr class="${cls}">
-
-    <td><strong>#${i+1}</strong></td>
-
-    <td>
-
-    <input
-      class="nameInput ${!isAdmin?'readonly':''}"
-      value="${c.name||''}"
-      ${!isAdmin?'readonly':''}
-      onchange="
-      updateName(
-      '${current}',
-      '${c.id}',
-      this.value
-      )
-      "
-    >
-
-    </td>
-    `;
+    <td><input class="nameInput"
+      value="${c.name}"
+      onchange="updateName('${current}','${c.id}',this.value)">
+    </td>`;
 
     for(let s=0;s<solves;s++){
-
-      html += `
+      html+=`
       <td>
-
-      <input
-        class="${!isAdmin?'readonly':''}"
+      <input inputmode="decimal"
         value="${c.times[s]||''}"
-        ${!isAdmin?'readonly':''}
-        onchange="
-        updateSolve(
-        '${current}',
-        '${c.id}',
-        ${s},
-        this.value
-        )
-        "
-      >
-
-      </td>
-      `;
-
+        onchange="updateTime('${current}','${c.id}',${s},this.value)">
+      </td>`;
     }
 
-    html += `
-    <td>${c.avg ?? "-"}</td>
-    <td>${c.best ?? "-"}</td>
-    </tr>
-    `;
-
+    html+=`
+    <td>${c.avg??"-"}</td>
+    <td>${c.best??"-"}</td>
+    </tr>`;
   });
 
-  html += `
-  </table>
-  </div>
-  </div>
-  `;
-
-  document
-  .getElementById("content")
-  .innerHTML = html;
-
+  html+="</table>";
+  document.getElementById("content").innerHTML=html;
 }
 
-/* START */
-
-load();
+start();
 
 </script>
 
